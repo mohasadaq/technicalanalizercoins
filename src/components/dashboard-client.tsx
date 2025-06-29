@@ -168,17 +168,17 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
             <Logo className="size-8 text-primary" />
             <h1 className="text-xl font-semibold">Gold Predictor</h1>
           </div>
-          <div className="relative mt-2">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-             <SidebarInput
-                placeholder="Search coins..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-          </div>
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="p-3 !gap-0">
+          <div className="relative mb-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <SidebarInput
+              placeholder="Search coins..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
           <SidebarMenu>
             {isSearching ? (
               <>
