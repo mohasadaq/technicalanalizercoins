@@ -34,7 +34,7 @@ import { Logo } from './icons';
 import { PriceChart } from './price-chart';
 import { AnalysisResults } from './analysis-results';
 import { Skeleton } from './ui/skeleton';
-import { Bot, CandlestickChart, Github, Search } from 'lucide-react';
+import { Bot, CandlestickChart, Github, RefreshCw, Search } from 'lucide-react';
 
 export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   const { toast } = useToast();
@@ -94,8 +94,8 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
     setRecommendation(null);
     setSearchQuery('');
   };
-  
-  React.useEffect(() => {
+
+  const runAnalysis = React.useCallback((isRefresh = false) => {
     if (!selectedCoin) return;
 
     startTransition(async () => {
@@ -147,6 +147,13 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
           setRecommendation(null);
         }
 
+        if (isRefresh) {
+            toast({
+                title: 'Data Refreshed',
+                description: `Successfully updated analysis for ${selectedCoin.name}.`
+            });
+        }
+
       } catch (error) {
         console.error('Analysis failed:', error);
         toast({
@@ -157,6 +164,13 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         setSelectedCoin(null);
       }
     });
+  }, [selectedCoin, timeframe, toast, setSelectedCoin]);
+  
+  React.useEffect(() => {
+    if (selectedCoin) {
+      runAnalysis();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCoin, timeframe]);
 
 
@@ -256,6 +270,16 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
                           </Button>
                       ))}
                     </div>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => runAnalysis(true)}
+                        disabled={isPending}
+                        className="h-9 w-9"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
+                        <span className="sr-only">Refresh</span>
+                    </Button>
                 </div>
               </div>
 
