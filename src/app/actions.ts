@@ -15,6 +15,8 @@ import {
   type TradeRecommendationSummaryInput, 
   type TradeRecommendationSummaryOutput as TradeRecommendationSummaryOutputType 
 } from '@/ai/flows/trade-recommendation-summary';
+import { searchCoins as searchCoinsData } from '@/lib/data';
+import type { Coin } from '@/types';
 
 export type AnalyzeGoldenCrossOutput = AnalyzeGoldenCrossOutputType;
 export type PredictResistanceOutput = PredictResistanceOutputType;
@@ -31,4 +33,8 @@ export async function predictResistance(input: PredictResistanceInput): Promise<
 
 export async function tradeRecommendationSummary(input: TradeRecommendationSummaryInput): Promise<TradeRecommendationSummaryOutput> {
   return await tradeRecommendationSummaryFlow(input);
+}
+
+export async function searchCoins(query: string): Promise<Coin[]> {
+    return await searchCoinsData(query);
 }

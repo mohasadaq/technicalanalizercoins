@@ -1,14 +1,52 @@
 import type { Coin, PriceData } from "@/types";
 
-const coins: Coin[] = [
-  { id: "bitcoin", name: "Bitcoin", ticker: "BTC" },
-  { id: "ethereum", name: "Ethereum", ticker: "ETH" },
-  { id: "solana", name: "Solana", ticker: "SOL" },
-  { id: "ripple", name: "XRP", ticker: "XRP" },
-];
+export async function getCoins(): Promise<Coin[]> {
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch top coins from CoinGecko API: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      ticker: c.symbol.toUpperCase(),
+    }));
+  } catch (error) {
+    console.error("Error fetching top coins:", error);
+    // Fallback to a static list if API fails
+    return [
+      { id: "bitcoin", name: "Bitcoin", ticker: "BTC" },
+      { id: "ethereum", name: "Ethereum", ticker: "ETH" },
+      { id: "solana", name: "Solana", ticker: "SOL" },
+      { id: "ripple", name: "XRP", ticker: "XRP" },
+    ];
+  }
+}
 
-export function getCoins(): Coin[] {
-  return coins;
+export async function searchCoins(query: string): Promise<Coin[]> {
+    if (!query.trim()) {
+        return [];
+    }
+    try {
+        const response = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch data from CoinGecko API: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (!data.coins) {
+            return [];
+        }
+        const searchResults: Coin[] = data.coins.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            ticker: c.symbol.toUpperCase(),
+        }));
+        return searchResults.slice(0, 20);
+    } catch (error) {
+        console.error("Error searching coins:", error);
+        return [];
+    }
 }
 
 function calculateMA(data: number[], windowSize: number): (number | undefined)[] {

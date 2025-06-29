@@ -11,26 +11,29 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  SidebarInput,
+  SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { getHistoricalData } from '@/lib/data';
 import type { Coin, PriceData } from '@/types';
 import {
   analyzeGoldenCross,
   predictResistance,
   tradeRecommendationSummary,
+  searchCoins,
   type AnalyzeGoldenCrossOutput,
   type PredictResistanceOutput,
   type TradeRecommendationSummaryOutput,
 } from '@/app/actions';
+import { getHistoricalData } from '@/lib/data';
 import { Logo } from './icons';
 import { PriceChart } from './price-chart';
 import { AnalysisResults } from './analysis-results';
 import { Skeleton } from './ui/skeleton';
-import { Bot, CandlestickChart, Github } from 'lucide-react';
+import { Bot, CandlestickChart, Github, Search } from 'lucide-react';
 
-export function DashboardClient({ coins }: { coins: Coin[] }) {
+export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   const { toast } = useToast();
   const [selectedCoin, setSelectedCoin] = React.useState<Coin | null>(null);
   const [isPending, startTransition] = React.useTransition();
@@ -39,6 +42,34 @@ export function DashboardClient({ coins }: { coins: Coin[] }) {
   const [analysis, setAnalysis] = React.useState<AnalyzeGoldenCrossOutput | null>(null);
   const [resistance, setResistance] = React.useState<PredictResistanceOutput | null>(null);
   const [recommendation, setRecommendation] = React.useState<TradeRecommendationSummaryOutput | null>(null);
+  
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [isSearching, startSearchTransition] = React.useTransition();
+  const [displayedCoins, setDisplayedCoins] = React.useState<Coin[]>(initialCoins);
+
+  React.useEffect(() => {
+    setDisplayedCoins(initialCoins);
+  }, [initialCoins]);
+
+  React.useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setDisplayedCoins(initialCoins);
+      return;
+    }
+    
+    const handler = setTimeout(() => {
+      if (searchQuery.trim().length > 1) {
+        startSearchTransition(async () => {
+          const results = await searchCoins(searchQuery);
+          setDisplayedCoins(results);
+        });
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery, initialCoins]);
 
   const handleCoinSelect = (coin: Coin) => {
     if (selectedCoin?.id === coin.id) return;
@@ -48,6 +79,7 @@ export function DashboardClient({ coins }: { coins: Coin[] }) {
     setAnalysis(null);
     setResistance(null);
     setRecommendation(null);
+    setSearchQuery('');
 
     startTransition(async () => {
       try {
@@ -81,8 +113,9 @@ export function DashboardClient({ coins }: { coins: Coin[] }) {
         toast({
           variant: 'destructive',
           title: 'Analysis Failed',
-          description: 'Could not perform analysis for the selected coin.',
+          description: `Could not perform analysis for ${coin.name}. This coin may not be supported.`,
         });
+        setSelectedCoin(null);
       }
     });
   };
@@ -95,21 +128,43 @@ export function DashboardClient({ coins }: { coins: Coin[] }) {
             <Logo className="size-8 text-primary" />
             <h1 className="text-xl font-semibold">Gold Predictor</h1>
           </div>
+          <div className="relative mt-2">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+             <SidebarInput
+                placeholder="Search coins..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+          </div>
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {coins.map((coin) => (
-              <SidebarMenuItem key={coin.id}>
-                <SidebarMenuButton
-                  onClick={() => handleCoinSelect(coin)}
-                  isActive={selectedCoin?.id === coin.id}
-                  disabled={isPending}
-                >
-                  <CandlestickChart />
-                  <span>{coin.name} ({coin.ticker})</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {isSearching ? (
+              <>
+                <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
+              </>
+            ) : displayedCoins.length > 0 ? (
+                displayedCoins.map((coin) => (
+                  <SidebarMenuItem key={coin.id}>
+                    <SidebarMenuButton
+                      onClick={() => handleCoinSelect(coin)}
+                      isActive={selectedCoin?.id === coin.id}
+                      disabled={isPending}
+                    >
+                      <CandlestickChart />
+                      <span>{coin.name} ({coin.ticker})</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+            ) : (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                    No results found.
+                </div>
+            )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-3 border-t border-sidebar-border">
@@ -123,20 +178,20 @@ export function DashboardClient({ coins }: { coins: Coin[] }) {
       </Sidebar>
       <SidebarInset>
         <div className="flex-1 p-4 md:p-6 lg:p-8 space-y-6">
-          {isPending && <DashboardSkeleton />}
+          {(isPending && !isSearching) && <DashboardSkeleton />}
           {!isPending && !selectedCoin && <WelcomeMessage />}
           {!isPending && selectedCoin && (
             <div className="space-y-6">
               <h2 className="text-3xl font-bold tracking-tight">
                 {selectedCoin.name} Analysis
               </h2>
-              {historicalData && (
+              {historicalData ? (
                 <PriceChart 
                   priceData={historicalData.prices} 
                   resistanceLevels={resistance?.resistanceLevels} 
                   suggestedTradePrice={analysis?.suggestedTradePrice}
                 />
-              )}
+              ) : (isPending && <Skeleton className="aspect-video w-full" />)}
               <AnalysisResults
                 analysis={analysis}
                 resistance={resistance}
