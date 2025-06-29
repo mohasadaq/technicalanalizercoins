@@ -18,12 +18,12 @@ const chartConfig = {
     label: 'Price (USD)',
     color: 'hsl(var(--primary))',
   },
-  '50_day_ma': {
-    label: '50-Day MA',
+  ma_short: {
+    label: 'Short MA',
     color: 'hsl(var(--chart-2))',
   },
-  '200_day_ma': {
-    label: '200-Day MA',
+  ma_long: {
+    label: 'Long MA',
     color: 'hsl(var(--chart-3))',
   },
 } satisfies ChartConfig;
@@ -34,7 +34,7 @@ export function PriceChart({ priceData, resistanceLevels, suggestedTradePrice }:
       <CardHeader>
         <CardTitle>Price and Moving Averages</CardTitle>
         <CardDescription>
-          Historical price data showing the 50-day and 200-day moving averages.
+          Historical price data showing the short-term and long-term moving averages.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -69,7 +69,7 @@ export function PriceChart({ priceData, resistanceLevels, suggestedTradePrice }:
                 content={<ChartTooltipContent
                   indicator="dot"
                   formatter={(value, name) => 
-                    (name === 'price' || name === '50_day_ma' || name === '200_day_ma') 
+                    (name === 'price' || name === 'ma_short' || name === 'ma_long') 
                     ? `$${Number(value).toLocaleString()}` 
                     : value
                   }
@@ -83,19 +83,19 @@ export function PriceChart({ priceData, resistanceLevels, suggestedTradePrice }:
                 stackId="a"
               />
               <Area
-                dataKey="50_day_ma"
+                dataKey="ma_short"
                 type="natural"
                 fill="transparent"
-                stroke="var(--color-50_day_ma)"
+                stroke="var(--color-ma_short)"
                 strokeWidth={2}
                 dot={false}
                 stackId="b"
               />
                <Area
-                dataKey="200_day_ma"
+                dataKey="ma_long"
                 type="natural"
                 fill="transparent"
-                stroke="var(--color-200_day_ma)"
+                stroke="var(--color-ma_long)"
                 strokeWidth={2}
                 dot={false}
                 stackId="c"
@@ -107,7 +107,7 @@ export function PriceChart({ priceData, resistanceLevels, suggestedTradePrice }:
                     stroke="var(--color-accent)"
                     strokeDasharray="3 3"
                   >
-                     <YAxis.Label value="Golden Cross Price" position="insideTopRight" fill="hsl(var(--accent))" fontSize={12} />
+                     <YAxis.Label value="Suggested Price" position="insideTopRight" fill="hsl(var(--accent))" fontSize={12} />
                   </ReferenceLine>
               )}
 

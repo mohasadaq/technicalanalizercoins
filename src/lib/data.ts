@@ -63,9 +63,9 @@ function calculateMA(data: number[], windowSize: number): (number | undefined)[]
     return result;
 }
 
-export async function getHistoricalData(coinId: string, days: number = 250): Promise<{ prices: PriceData[], dataString: string, currentPrice: number }> {
+export async function getHistoricalData(coinId: string, days: number = 30): Promise<{ prices: PriceData[], dataString: string, currentPrice: number }> {
     try {
-        const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}&interval=daily`);
+        const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch data from CoinGecko API: ${response.statusText}`);
         }
@@ -87,13 +87,13 @@ export async function getHistoricalData(coinId: string, days: number = 250): Pro
         const prices: PriceData[] = priceData.map((p, i) => ({
             date: p.date.toISOString().split('T')[0],
             price: parseFloat(p.price.toFixed(2)),
-            '50_day_ma': fiftyDayMA[i] !== undefined ? parseFloat(fiftyDayMA[i]!.toFixed(2)) : undefined,
-            '200_day_ma': twoHundredDayMA[i] !== undefined ? parseFloat(twoHundredDayMA[i]!.toFixed(2)) : undefined,
+            'ma_short': fiftyDayMA[i] !== undefined ? parseFloat(fiftyDayMA[i]!.toFixed(2)) : undefined,
+            'ma_long': twoHundredDayMA[i] !== undefined ? parseFloat(twoHundredDayMA[i]!.toFixed(2)) : undefined,
         }));
 
-        let dataString = 'Date,Price,50_day_ma,200_day_ma\n';
+        let dataString = 'Date,Price,ma_short,ma_long\n';
         prices.forEach(p => {
-            dataString += `${p.date},${p.price},${p['50_day_ma'] !== undefined ? p['50_day_ma'] : ''},${p['200_day_ma'] !== undefined ? p['200_day_ma'] : ''}\n`;
+            dataString += `${p.date},${p.price},${p['ma_short'] !== undefined ? p['ma_short'] : ''},${p['ma_long'] !== undefined ? p['ma_long'] : ''}\n`;
         });
         
         const currentPrice = prices[prices.length - 1].price;

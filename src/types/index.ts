@@ -7,6 +7,6 @@ export interface Coin {
 export interface PriceData {
   date: string;
   price: number;
-  "50_day_ma"?: number;
-  "200_day_ma"?: number;
+  "ma_short"?: number;
+  "ma_long"?: number;
 }

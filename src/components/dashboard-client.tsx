@@ -47,12 +47,12 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   const [isSearching, startSearchTransition] = React.useTransition();
   const [displayedCoins, setDisplayedCoins] = React.useState<Coin[]>(initialCoins);
   
-  const [timeframe, setTimeframe] = React.useState(250);
+  const [timeframe, setTimeframe] = React.useState(30);
   const timeframes = [
+    { label: '1D', value: 1 },
+    { label: '7D', value: 7 },
+    { label: '30D', value: 30 },
     { label: '90D', value: 90 },
-    { label: '180D', value: 180 },
-    { label: '250D', value: 250 },
-    { label: '1Y', value: 365 },
   ];
 
   React.useEffect(() => {
@@ -101,6 +101,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         const analysisResult = await analyzeGoldenCross({
           coinName: selectedCoin.name,
           historicalData: data.dataString,
+          timeframeDays: timeframe,
         });
         setAnalysis(analysisResult);
 
