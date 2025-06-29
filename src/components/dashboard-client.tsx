@@ -51,7 +51,7 @@ export function DashboardClient({ coins }: { coins: Coin[] }) {
 
     startTransition(async () => {
       try {
-        const data = getHistoricalData(coin.id);
+        const data = await getHistoricalData(coin.id);
         setHistoricalData(data);
 
         const analysisResult = await analyzeGoldenCross({
