@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Binance Gold Predictor',
-  description: 'AI-powered Golden Cross and Resistance analysis for Binance coins.',
+  title: 'Alpha Predict',
+  description: 'AI-powered trading analysis for cryptocurrencies.',
 };
 
 export default function RootLayout({

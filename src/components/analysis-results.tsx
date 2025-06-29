@@ -175,32 +175,47 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
             <CardDescription className="text-base">Awaiting final recommendation...</CardDescription>
         )}
       </CardHeader>
-      <CardContent className="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <CardContent className="flex-grow">
         {recommendation ? (
-          <>
-            <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Strategy</p>
-                <Badge variant="secondary" className="text-base py-1 px-3">{recommendation.strategy}</Badge>
-            </div>
-            <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Entry Price</p>
-                <p className="text-lg font-bold text-primary">{recommendation.entryPrice ? `$${recommendation.entryPrice.toLocaleString()}`: 'N/A'}</p>
-            </div>
-            <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Take Profit</p>
-                <div className="flex flex-wrap gap-2">
-                    {recommendation.takeProfitLevels.map((tp, i) => (
-                        <Badge key={i} variant="outline" className="text-accent border-accent/50 bg-accent/10 text-sm">
-                            ${tp.toLocaleString()}
-                        </Badge>
-                    ))}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Strategy</p>
+                    <Badge variant="secondary" className="text-base py-1 px-3">{recommendation.strategy}</Badge>
+                </div>
+                <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Entry Price</p>
+                    <p className="text-lg font-bold text-primary">{recommendation.entryPrice ? `$${recommendation.entryPrice.toLocaleString()}`: 'N/A'}</p>
+                </div>
+                <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Take Profit</p>
+                    <div className="flex flex-wrap gap-2">
+                        {recommendation.takeProfitLevels.map((tp, i) => (
+                            <Badge key={i} variant="outline" className="text-accent border-accent/50 bg-accent/10 text-sm py-1">
+                                ${tp.price.toLocaleString()}
+                                <span className="font-normal ml-1.5 opacity-80">(+{tp.percentage.toFixed(1)}%)</span>
+                            </Badge>
+                        ))}
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Stop Loss</p>
+                    <p className="text-lg font-bold text-destructive">{recommendation.stopLossLevel ? `$${recommendation.stopLossLevel.toLocaleString()}` : 'N/A'}</p>
                 </div>
             </div>
-            <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Stop Loss</p>
-                <p className="text-lg font-bold text-destructive">{recommendation.stopLossLevel ? `$${recommendation.stopLossLevel.toLocaleString()}` : 'N/A'}</p>
-            </div>
-          </>
+            {recommendation.dcaLevels && recommendation.dcaLevels.length > 0 && (
+                <div className="space-y-2 pt-4 border-t border-dashed">
+                    <p className="text-sm font-medium text-muted-foreground">Dollar-Cost Averaging Plan</p>
+                    <div className="flex flex-wrap gap-2">
+                        {recommendation.dcaLevels.map((dca, i) => (
+                            <Badge key={i} variant="outline" className="border-primary/50 bg-primary/10 text-primary text-sm py-1 font-semibold">
+                                Buy {dca.allocation}% at ~${dca.price.toLocaleString()}
+                            </Badge>
+                        ))}
+                    </div>
+                </div>
+            )}
+          </div>
         ) : (
           <div className="md:col-span-2 lg:col-span-4 text-center text-muted-foreground py-8">
             Generating detailed trade plan...

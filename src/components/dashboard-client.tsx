@@ -175,7 +175,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
             <div className="flex items-center gap-2 mr-auto">
                 <Logo className="size-8 text-primary" />
-                <h1 className="text-xl font-semibold hidden sm:block">Gold Predictor</h1>
+                <h1 className="text-xl font-semibold hidden sm:block">Alpha Predict</h1>
             </div>
             
             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -307,7 +307,7 @@ function WelcomeMessage() {
       <div className="mb-4 flex size-20 items-center justify-center rounded-full bg-secondary">
         <Bot className="size-10 text-secondary-foreground" />
       </div>
-      <h3 className="text-2xl font-bold tracking-tight">Welcome to Gold Predictor</h3>
+      <h3 className="text-2xl font-bold tracking-tight">Welcome to Alpha Predict</h3>
       <p className="mt-2 max-w-md text-muted-foreground">
         Select a cryptocurrency from the dropdown above to begin your AI-powered technical analysis.
       </p>

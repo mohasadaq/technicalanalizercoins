@@ -23,8 +23,15 @@ export type TradeRecommendationSummaryInput = z.infer<
 const TradeRecommendationSummaryOutputSchema = z.object({
   strategy: z.string().describe("The name of the trading strategy (e.g., 'Bullish Breakout', 'Range Trading')."),
   entryPrice: z.number().optional().describe("The suggested entry price for the trade."),
-  takeProfitLevels: z.array(z.number()).describe("An array of suggested take-profit price levels."),
+  takeProfitLevels: z.array(z.object({
+      price: z.number().describe("The take-profit price level."),
+      percentage: z.number().describe("The percentage gain from the entry price at this level."),
+  })).describe("An array of suggested take-profit levels with prices and percentage gains."),
   stopLossLevel: z.number().optional().describe("The suggested stop-loss price level to manage risk."),
+  dcaLevels: z.array(z.object({
+      price: z.number().describe("The price for the DCA entry."),
+      allocation: z.number().describe("The percentage of capital to allocate at this level (e.g., 50 for 50%)."),
+  })).optional().describe("An array of suggested Dollar-Cost Averaging (DCA) levels to build a position, if applicable."),
   summary: z.string().describe("A concise summary of the trade recommendation and reasoning."),
   confidence: z.string().describe("A confidence indicator for the recommendation (e.g., 'High', 'Medium', 'Low')."),
 });
@@ -47,10 +54,11 @@ const prompt = ai.definePrompt({
 Analyze the initial analysis, support levels, and resistance levels to formulate a trading strategy. Your recommendation should be specific and include:
 1.  **Strategy**: A clear name for the trading setup (e.g., "Bullish Breakout Above Resistance", "Support Bounce", "Range Trading").
 2.  **Entry Price**: A specific price point to enter the trade. This should be based on the analysis, like a breakout above a resistance or a bounce from a support level.
-3.  **Take-Profit Levels**: Identify 1-3 realistic price targets where the trader could take profits. These should correspond to resistance levels or other technical targets.
+3.  **Take-Profit Levels**: Identify 1-3 realistic price targets where the trader could take profits. These should correspond to resistance levels or other technical targets. For each level, provide the price and the percentage gain from the entry price.
 4.  **Stop-Loss Level**: A specific price to exit the trade if it moves against the plan. This should be placed logically below a support level or key technical area to limit potential losses.
-5.  **Summary**: A concise explanation of the reasoning behind the recommendation.
-6.  **Confidence**: Your confidence in this trade setup (High, Medium, or Low).
+5.  **DCA Levels**: If appropriate for the strategy (e.g., buying a dip, not chasing a sharp breakout), suggest 1-2 Dollar-Cost Averaging (DCA) levels below the initial entry. Base these on key support levels. For each DCA level, specify the price and the percentage of capital to allocate (e.g., 30 for 30%). If a DCA strategy is not suitable, return an empty array for dcaLevels.
+6.  **Summary**: A concise explanation of the reasoning behind the recommendation.
+7.  **Confidence**: Your confidence in this trade setup (High, Medium, or Low).
 
 Initial Analysis: {{{initialAnalysis}}}
 Resistance Prediction: {{{resistancePrediction}}}
