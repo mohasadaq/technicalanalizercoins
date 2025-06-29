@@ -38,20 +38,6 @@ export function AnalysisResults({ analysis, resistance, recommendation, coin }: 
   if (!analysis) {
     return null;
   }
-  
-  if (!analysis.goldenCrossDetected) {
-    return (
-      <Card className="bg-card/50 border-dashed">
-        <CardHeader className="flex-row items-center gap-4">
-          <AlertTriangle className="size-8 text-muted-foreground" />
-          <div>
-            <CardTitle>No Golden Cross Detected</CardTitle>
-            <CardDescription>{analysis.analysis}</CardDescription>
-          </div>
-        </CardHeader>
-      </Card>
-    );
-  }
 
   const confidenceColor = (level?: string) => {
     switch (level?.toLowerCase()) {
@@ -65,37 +51,75 @@ export function AnalysisResults({ analysis, resistance, recommendation, coin }: 
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-md bg-primary/10">
-              <TrendingUp className="size-6 text-primary" />
+      {analysis.goldenCrossDetected ? (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-md bg-primary/10">
+                <TrendingUp className="size-6 text-primary" />
+              </div>
+              <CardTitle>Golden Cross Analysis</CardTitle>
             </div>
-            <CardTitle>Golden Cross Analysis</CardTitle>
-          </div>
-          <CardDescription>{analysis.analysis}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Status</span>
-            <Badge variant="outline" className="text-green-400 border-green-500/50 bg-green-500/10">
-              <CheckCircle2 className="mr-2 h-4 w-4" /> Detected
-            </Badge>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Confidence</span>
-            <Badge variant="outline" className={confidenceColor(analysis.confidenceLevel)}>
-              {analysis.confidenceLevel || 'N/A'}
-            </Badge>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Suggested Trade Price</span>
-            <span className="font-semibold text-primary">
-              {analysis.suggestedTradePrice ? `$${analysis.suggestedTradePrice.toLocaleString()}` : 'N/A'}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+            <CardDescription>{analysis.analysis}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Status</span>
+              <Badge variant="outline" className="text-green-400 border-green-500/50 bg-green-500/10">
+                <CheckCircle2 className="mr-2 h-4 w-4" /> Detected
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Confidence</span>
+              <Badge variant="outline" className={confidenceColor(analysis.confidenceLevel)}>
+                {analysis.confidenceLevel || 'N/A'}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Suggested Trade Price</span>
+              <span className="font-semibold text-primary">
+                {analysis.suggestedTradePrice ? `$${analysis.suggestedTradePrice.toLocaleString()}` : 'N/A'}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-md bg-primary/10">
+                <TrendingUp className="size-6 text-primary" />
+              </div>
+              <CardTitle>Market Analysis</CardTitle>
+            </div>
+            <CardDescription>{analysis.analysis}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Golden Cross</span>
+              <Badge variant="outline" className="text-muted-foreground border-dashed">
+                <XCircle className="mr-2 h-4 w-4" /> Not Detected
+              </Badge>
+            </div>
+            {analysis.suggestedTradePrice && (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Suggested Entry Price</span>
+                <span className="font-semibold text-primary">
+                  {`$${analysis.suggestedTradePrice.toLocaleString()}`}
+                </span>
+              </div>
+            )}
+            {analysis.confidenceLevel && (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Confidence</span>
+                <Badge variant="outline" className={confidenceColor(analysis.confidenceLevel)}>
+                  {analysis.confidenceLevel}
+                </Badge>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

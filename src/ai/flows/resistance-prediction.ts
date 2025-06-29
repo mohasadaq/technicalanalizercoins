@@ -1,9 +1,9 @@
 'use server';
 
 /**
- * @fileOverview Resistance level prediction flow for crypto golden cross formations.
+ * @fileOverview Resistance level prediction flow for crypto analysis.
  *
- * - predictResistance - Predicts resistance levels for a cryptocurrency undergoing a golden cross.
+ * - predictResistance - Predicts resistance levels for a cryptocurrency.
  * - PredictResistanceInput - Input type for the predictResistance function.
  * - PredictResistanceOutput - Return type for the predictResistance function.
  */
@@ -13,9 +13,9 @@ import {z} from 'genkit';
 
 const PredictResistanceInputSchema = z.object({
   coinTicker: z.string().describe('The ticker symbol of the cryptocurrency.'),
-  goldenCrossPrice: z
+  referencePrice: z
     .number()
-    .describe('The price at which the golden cross is forming.'),
+    .describe('The reference price for the analysis, such as current price or suggested entry price.'),
   analysisContext: z
     .string()
     .describe(
@@ -54,10 +54,10 @@ const predictResistancePrompt = ai.definePrompt({
   input: {schema: PredictResistanceInputSchema},
   output: {schema: PredictResistanceOutputSchema},
   prompt: `You are an expert cryptocurrency technical analyst.
-  Given the following information about a cryptocurrency experiencing a golden cross, predict the resistance levels and the confidence in your prediction.
+  Given the following information about a cryptocurrency, predict the resistance levels and the confidence in your prediction. The analysis might be for a golden cross or another chart pattern.
 
   Coin Ticker: {{{coinTicker}}}
-  Golden Cross Price: {{{goldenCrossPrice}}}
+  Reference Price: {{{referencePrice}}}
   Analysis Context: {{{analysisContext}}}
 
   Provide the resistance levels as an array of numbers and a confidence score between 0 and 1.  Also, explain the reasoning behind your predictions.

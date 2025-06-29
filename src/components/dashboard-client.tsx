@@ -104,16 +104,16 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         });
         setAnalysis(analysisResult);
 
-        if (analysisResult.goldenCrossDetected) {
+        if (analysisResult && analysisResult.analysis) {
           const resistanceResult = await predictResistance({
             coinTicker: selectedCoin.ticker,
-            goldenCrossPrice: analysisResult.suggestedTradePrice || data.currentPrice,
+            referencePrice: analysisResult.suggestedTradePrice || data.currentPrice,
             analysisContext: analysisResult.analysis,
           });
           setResistance(resistanceResult);
           
           const recommendationResult = await tradeRecommendationSummary({
-            goldenCrossAnalysis: analysisResult.analysis,
+            initialAnalysis: analysisResult.analysis,
             resistancePrediction: resistanceResult.reasoning,
             currentPrice: data.currentPrice,
           });

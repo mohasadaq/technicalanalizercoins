@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview Provides a summary of trade recommendations (buy/sell prices) based on golden cross and resistance analysis.
+ * @fileOverview Provides a summary of trade recommendations (buy/sell prices) based on technical analysis and resistance prediction.
  *
  * - tradeRecommendationSummary - A function that generates a trade recommendation summary.
  * - TradeRecommendationSummaryInput - The input type for the tradeRecommendationSummary function.
@@ -11,7 +11,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TradeRecommendationSummaryInputSchema = z.object({
-  goldenCrossAnalysis: z.string().describe('The analysis of the golden cross formation.'),
+  initialAnalysis: z.string().describe('The initial technical analysis of the asset.'),
   resistancePrediction: z.string().describe('The predicted resistance levels.'),
   currentPrice: z.number().describe('The current price of the asset.'),
 });
@@ -39,9 +39,9 @@ const prompt = ai.definePrompt({
   name: 'tradeRecommendationSummaryPrompt',
   input: {schema: TradeRecommendationSummaryInputSchema},
   output: {schema: TradeRecommendationSummaryOutputSchema},
-  prompt: `Based on the following golden cross analysis and resistance prediction, provide a concise trade recommendation (buy/sell prices) and a confidence indicator.
+  prompt: `Based on the following initial technical analysis and resistance prediction, provide a concise trade recommendation (buy/sell prices) and a confidence indicator.
 
-Golden Cross Analysis: {{{goldenCrossAnalysis}}}
+Initial Analysis: {{{initialAnalysis}}}
 Resistance Prediction: {{{resistancePrediction}}}
 Current Price: {{{currentPrice}}}
 
