@@ -2,20 +2,6 @@
 'use client';
 
 import * as React from 'react';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  SidebarInset,
-  SidebarInput,
-  SidebarMenuSkeleton,
-  SidebarTrigger,
-} from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Coin, PriceData } from '@/types';
@@ -35,8 +21,10 @@ import { Logo } from './icons';
 import { PriceChart } from './price-chart';
 import { AnalysisResults } from './analysis-results';
 import { Skeleton } from './ui/skeleton';
-import { Bot, CandlestickChart, Github, RefreshCw, Search } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Bot, CandlestickChart, ChevronsUpDown, Github, RefreshCw, Search } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   const { toast } = useToast();
@@ -61,24 +49,23 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
     { label: '90D', value: 90 },
   ];
 
-  React.useEffect(() => {
-    setDisplayedCoins(initialCoins);
-  }, [initialCoins]);
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
 
   React.useEffect(() => {
+    // When search query is empty, show initial coins. If not empty, search.
     if (searchQuery.trim() === '') {
       setDisplayedCoins(initialCoins);
       return;
     }
     
     const handler = setTimeout(() => {
-      if (searchQuery.trim().length > 1) {
+      if (searchQuery.trim().length > 0) {
         startSearchTransition(async () => {
           const results = await searchCoins(searchQuery);
           setDisplayedCoins(results);
         });
       }
-    }, 500);
+    }, 300);
 
     return () => {
       clearTimeout(handler);
@@ -86,7 +73,10 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   }, [searchQuery, initialCoins]);
 
   const handleCoinSelect = (coin: Coin) => {
-    if (selectedCoin?.id === coin.id) return;
+    if (selectedCoin?.id === coin.id) {
+        setPopoverOpen(false);
+        return;
+    };
 
     setSelectedCoin(coin);
     setHistoricalData(null);
@@ -95,6 +85,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
     setSupport(null);
     setRecommendation(null);
     setSearchQuery('');
+    setPopoverOpen(false);
   };
 
   const runAnalysis = React.useCallback((isRefresh = false) => {
@@ -110,11 +101,9 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
             setRecommendation(null);
         }
         
-        // 1. Get historical data
         const data = await getHistoricalData(selectedCoin.id, timeframe);
         setHistoricalData(data);
 
-        // 2. Perform initial analysis
         const analysisResult = await analyzeGoldenCross({
           coinName: selectedCoin.name,
           historicalData: data.dataString,
@@ -122,7 +111,6 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         });
         setAnalysis(analysisResult);
 
-        // 3. If analysis is successful, predict support & resistance, then get recommendation
         if (analysisResult?.analysis) {
           const referencePrice = analysisResult.suggestedTradePrice || data.currentPrice;
 
@@ -183,225 +171,160 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCoin, timeframe]);
 
-
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader className="border-b border-sidebar-border p-3">
-          <div className="flex items-center gap-2">
-            <Logo className="size-8 text-primary" />
-            <h1 className="text-xl font-semibold">Gold Predictor</h1>
-          </div>
-        </SidebarHeader>
-        <SidebarContent className="p-3 !gap-0">
-          <div className="relative mb-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <SidebarInput
-              placeholder="Search coins..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <SidebarMenu>
-            {isSearching ? (
-              <>
-                <SidebarMenuSkeleton showIcon />
-                <SidebarMenuSkeleton showIcon />
-                <SidebarMenuSkeleton showIcon />
-                <SidebarMenuSkeleton showIcon />
-              </>
-            ) : displayedCoins.length > 0 ? (
-                displayedCoins.map((coin) => (
-                  <SidebarMenuItem key={coin.id}>
-                    <SidebarMenuButton
-                      onClick={() => handleCoinSelect(coin)}
-                      isActive={selectedCoin?.id === coin.id}
-                      disabled={isPending}
-                    >
-                      <CandlestickChart />
-                      <span>{coin.name} ({coin.ticker})</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))
-            ) : (
-                <div className="p-4 text-center text-sm text-muted-foreground">
-                    No results found.
-                </div>
-            )}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter className="p-3 border-t border-sidebar-border">
-          <Button variant="ghost" asChild>
-            <a href="https://github.com/firebase/studio-examples" target="_blank">
-              <Github />
-              <span>Source Code</span>
-            </a>
-          </Button>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
-            <div className="flex items-center gap-4">
-                <SidebarTrigger />
-                {selectedCoin ? (
-                <div>
-                    <h1 className="font-semibold text-base leading-tight">
-                    {selectedCoin.name}{' '}
-                    <span className="text-muted-foreground">{selectedCoin.ticker}</span>
-                    </h1>
-                    {historicalData?.currentPrice && (
-                    <p className="text-sm font-bold text-primary leading-tight">
-                        ${historicalData.currentPrice.toLocaleString()}
-                    </p>
-                    )}
-                </div>
-                ) : (
-                <div className="flex items-center gap-2">
-                    <Logo className="size-7 text-primary" />
-                    <h1 className="text-lg font-semibold">Gold Predictor</h1>
-                </div>
-                )}
+    <div className="flex min-h-screen w-full flex-col">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+            <div className="flex items-center gap-2 mr-auto">
+                <Logo className="size-8 text-primary" />
+                <h1 className="text-xl font-semibold hidden sm:block">Gold Predictor</h1>
             </div>
-            {selectedCoin && (
-                <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => runAnalysis(true)}
-                disabled={isPending}
-                className="h-8 w-8"
-                >
-                <RefreshCw className={`h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
-                <span className="sr-only">Refresh</span>
-                </Button>
-            )}
-        </header>
-        <main className="flex-1 space-y-4 p-4 md:space-y-6 md:p-6 lg:p-8">
-          {(isPending && !isSearching) && <DashboardSkeleton />}
-          {!isPending && !selectedCoin && <WelcomeMessage />}
-          {!isPending && selectedCoin && (
-            <div className="space-y-6">
-              {/* Desktop Header */}
-              <div className="hidden md:flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                        {selectedCoin.name} <span className="text-muted-foreground">{selectedCoin.ticker}</span>
-                    </h2>
-                    {historicalData?.currentPrice && (
-                        <p className="text-2xl font-bold text-primary">
-                        ${historicalData.currentPrice.toLocaleString()}
-                        </p>
-                    )}
-                </div>
-
-                <div className="flex w-full items-center gap-2 md:w-auto">
-                    <div className="flex flex-1 items-center gap-1 rounded-md bg-secondary p-1 md:flex-none">
-                      {timeframes.map((tf) => (
-                          <Button
-                              key={tf.value}
-                              variant={timeframe === tf.value ? 'default' : 'ghost'}
-                              size="sm"
-                              onClick={() => setTimeframe(tf.value)}
-                              disabled={isPending}
-                              className="flex-1 md:flex-none shadow-sm"
-                          >
-                              {tf.label}
-                          </Button>
-                      ))}
-                    </div>
+            
+            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
                     <Button
                         variant="outline"
-                        size="icon"
-                        onClick={() => runAnalysis(true)}
-                        disabled={isPending}
-                        className="h-9 w-9"
+                        role="combobox"
+                        aria-expanded={popoverOpen}
+                        className="w-[200px] sm:w-[300px] justify-between"
                     >
-                        <RefreshCw className={`h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
-                        <span className="sr-only">Refresh</span>
+                        {selectedCoin
+                        ? <span className="truncate">{`${selectedCoin.name} (${selectedCoin.ticker})`}</span>
+                        : "Select a coin..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
-                </div>
-              </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <div className="p-2">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search coins..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9"
+                                autoFocus
+                            />
+                        </div>
+                    </div>
+                    <ScrollArea className="h-[300px]">
+                        <div className="flex flex-col gap-1 p-2 pt-0">
+                            {isSearching ? (
+                                <p className="p-4 text-center text-sm text-muted-foreground">Searching...</p>
+                            ) : displayedCoins.length > 0 ? (
+                                displayedCoins.map((coin) => (
+                                    <Button
+                                        key={coin.id}
+                                        variant="ghost"
+                                        className="w-full justify-start gap-2"
+                                        onClick={() => handleCoinSelect(coin)}
+                                        disabled={isPending}
+                                    >
+                                        <CandlestickChart className="h-4 w-4" />
+                                        <span>{coin.name} ({coin.ticker})</span>
+                                    </Button>
+                                ))
+                            ) : (
+                                <div className="p-4 text-center text-sm text-muted-foreground">
+                                    No results found.
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </PopoverContent>
+            </Popover>
 
-              {/* Mobile Tabs */}
-              <Tabs defaultValue="chart" className="w-full md:hidden">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="chart">Chart</TabsTrigger>
-                    <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
-                </TabsList>
-                <TabsContent value="chart" className="pt-4 space-y-4">
-                  <div className="flex w-full items-center gap-2">
-                      <div className="flex flex-1 items-center gap-1 rounded-md bg-secondary p-1">
-                          {timeframes.map((tf) => (
-                              <Button
-                                  key={tf.value}
-                                  variant={timeframe === tf.value ? 'default' : 'ghost'}
-                                  size="sm"
-                                  onClick={() => setTimeframe(tf.value)}
-                                  disabled={isPending}
-                                  className="flex-1 shadow-sm"
-                              >
-                                  {tf.label}
-                              </Button>
-                          ))}
-                      </div>
-                  </div>
-                  {historicalData ? (
-                    <PriceChart 
-                      priceData={historicalData.prices} 
-                      resistanceLevels={resistance?.resistanceLevels}
-                      supportLevels={support?.supportLevels}
-                      suggestedTradePrice={analysis?.suggestedTradePrice}
-                    />
-                  ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
-                </TabsContent>
-                <TabsContent value="analysis" className="pt-4">
-                  <AnalysisResults
-                    analysis={analysis}
-                    resistance={resistance}
-                    support={support}
-                    recommendation={recommendation}
-                    coin={selectedCoin}
-                  />
-                </TabsContent>
-              </Tabs>
-              
-              {/* Desktop View */}
-              <div className="hidden space-y-6 md:block">
-                {historicalData ? (
-                    <PriceChart 
-                    priceData={historicalData.prices} 
-                    resistanceLevels={resistance?.resistanceLevels}
-                    supportLevels={support?.supportLevels}
-                    suggestedTradePrice={analysis?.suggestedTradePrice}
-                    />
-                ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
-                
-                <AnalysisResults
-                    analysis={analysis}
-                    resistance={resistance}
-                    support={support}
-                    recommendation={recommendation}
-                    coin={selectedCoin}
-                />
-              </div>
-
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" asChild className="hidden sm:flex">
+                    <a href="https://github.com/firebase/studio-examples" target="_blank">
+                        <Github />
+                        <span>Source Code</span>
+                    </a>
+                </Button>
+                <Button variant="ghost" size="icon" asChild className="flex sm:hidden">
+                    <a href="https://github.com/firebase/studio-examples" target="_blank">
+                        <Github />
+                        <span className="sr-only">Source Code</span>
+                    </a>
+                </Button>
             </div>
-          )}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+        </header>
+      <main className="flex-1 space-y-4 p-4 md:space-y-6 md:p-6 lg:p-8">
+        {(isPending && !isSearching) && <DashboardSkeleton />}
+        {!isPending && !selectedCoin && <WelcomeMessage />}
+        {!isPending && selectedCoin && (
+          <div className="space-y-6">
+            <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                  <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                      {selectedCoin.name} <span className="text-muted-foreground">{selectedCoin.ticker}</span>
+                  </h2>
+                  {historicalData?.currentPrice && (
+                      <p className="text-2xl font-bold text-primary">
+                      ${historicalData.currentPrice.toLocaleString()}
+                      </p>
+                  )}
+              </div>
+
+              <div className="flex w-full items-center gap-2 md:w-auto">
+                  <div className="flex flex-1 items-center gap-1 rounded-md bg-secondary p-1 md:flex-none">
+                    {timeframes.map((tf) => (
+                        <Button
+                            key={tf.value}
+                            variant={timeframe === tf.value ? 'default' : 'ghost'}
+                            size="sm"
+                            onClick={() => setTimeframe(tf.value)}
+                            disabled={isPending}
+                            className="flex-1 md:flex-none shadow-sm"
+                        >
+                            {tf.label}
+                        </Button>
+                    ))}
+                  </div>
+                  <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => runAnalysis(true)}
+                      disabled={isPending}
+                      className="h-9 w-9"
+                  >
+                      <RefreshCw className={`h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
+                      <span className="sr-only">Refresh</span>
+                  </Button>
+              </div>
+            </div>
+
+            {historicalData ? (
+                <PriceChart 
+                  priceData={historicalData.prices} 
+                  resistanceLevels={resistance?.resistanceLevels}
+                  supportLevels={support?.supportLevels}
+                  suggestedTradePrice={analysis?.suggestedTradePrice}
+                />
+            ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
+            
+            <AnalysisResults
+                analysis={analysis}
+                resistance={resistance}
+                support={support}
+                recommendation={recommendation}
+                coin={selectedCoin}
+            />
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
 
 function WelcomeMessage() {
   return (
-    <div className="flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-8 text-center">
+    <div className="flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-8 text-center mt-8">
       <div className="mb-4 flex size-20 items-center justify-center rounded-full bg-secondary">
         <Bot className="size-10 text-secondary-foreground" />
       </div>
       <h3 className="text-2xl font-bold tracking-tight">Welcome to Gold Predictor</h3>
       <p className="mt-2 max-w-md text-muted-foreground">
-        Select a cryptocurrency from the sidebar to begin your AI-powered technical analysis.
+        Select a cryptocurrency from the dropdown above to begin your AI-powered technical analysis.
       </p>
     </div>
   );
