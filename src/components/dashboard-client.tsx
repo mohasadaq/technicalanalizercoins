@@ -46,6 +46,14 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isSearching, startSearchTransition] = React.useTransition();
   const [displayedCoins, setDisplayedCoins] = React.useState<Coin[]>(initialCoins);
+  
+  const [timeframe, setTimeframe] = React.useState(250);
+  const timeframes = [
+    { label: '90D', value: 90 },
+    { label: '180D', value: 180 },
+    { label: '250D', value: 250 },
+    { label: '1Y', value: 365 },
+  ];
 
   React.useEffect(() => {
     setDisplayedCoins(initialCoins);
@@ -80,21 +88,25 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
     setResistance(null);
     setRecommendation(null);
     setSearchQuery('');
+  };
+  
+  React.useEffect(() => {
+    if (!selectedCoin) return;
 
     startTransition(async () => {
       try {
-        const data = await getHistoricalData(coin.id);
+        const data = await getHistoricalData(selectedCoin.id, timeframe);
         setHistoricalData(data);
 
         const analysisResult = await analyzeGoldenCross({
-          coinName: coin.name,
+          coinName: selectedCoin.name,
           historicalData: data.dataString,
         });
         setAnalysis(analysisResult);
 
         if (analysisResult.goldenCrossDetected) {
           const resistanceResult = await predictResistance({
-            coinTicker: coin.ticker,
+            coinTicker: selectedCoin.ticker,
             goldenCrossPrice: analysisResult.suggestedTradePrice || data.currentPrice,
             analysisContext: analysisResult.analysis,
           });
@@ -106,6 +118,9 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
             currentPrice: data.currentPrice,
           });
           setRecommendation(recommendationResult);
+        } else {
+          setResistance(null);
+          setRecommendation(null);
         }
 
       } catch (error) {
@@ -113,12 +128,13 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         toast({
           variant: 'destructive',
           title: 'Analysis Failed',
-          description: `Could not perform analysis for ${coin.name}. This coin may not be supported.`,
+          description: `Could not perform analysis for ${selectedCoin.name}. This coin may not be supported.`,
         });
         setSelectedCoin(null);
       }
     });
-  };
+  }, [selectedCoin, timeframe]);
+
 
   return (
     <SidebarProvider>
@@ -182,9 +198,26 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
           {!isPending && !selectedCoin && <WelcomeMessage />}
           {!isPending && selectedCoin && (
             <div className="space-y-6">
-              <h2 className="text-3xl font-bold tracking-tight">
-                {selectedCoin.name} Analysis
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <h2 className="text-3xl font-bold tracking-tight">
+                  {selectedCoin.name} Analysis
+                </h2>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground">Timeframe:</span>
+                    {timeframes.map((tf) => (
+                        <Button
+                            key={tf.value}
+                            variant={timeframe === tf.value ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setTimeframe(tf.value)}
+                            disabled={isPending}
+                        >
+                            {tf.label}
+                        </Button>
+                    ))}
+                </div>
+              </div>
+
               {historicalData ? (
                 <PriceChart 
                   priceData={historicalData.prices} 
@@ -223,7 +256,15 @@ function WelcomeMessage() {
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <Skeleton className="h-9 w-1/3" />
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-9 w-1/3" />
+        <div className="flex gap-2">
+            <Skeleton className="h-9 w-12" />
+            <Skeleton className="h-9 w-12" />
+            <Skeleton className="h-9 w-12" />
+            <Skeleton className="h-9 w-12" />
+        </div>
+      </div>
       <Skeleton className="aspect-video w-full" />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Skeleton className="h-48" />

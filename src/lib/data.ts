@@ -63,9 +63,9 @@ function calculateMA(data: number[], windowSize: number): (number | undefined)[]
     return result;
 }
 
-export async function getHistoricalData(coinId: string): Promise<{ prices: PriceData[], dataString: string, currentPrice: number }> {
+export async function getHistoricalData(coinId: string, days: number = 250): Promise<{ prices: PriceData[], dataString: string, currentPrice: number }> {
     try {
-        const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=250&interval=daily`);
+        const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}&interval=daily`);
         if (!response.ok) {
             throw new Error(`Failed to fetch data from CoinGecko API: ${response.statusText}`);
         }
