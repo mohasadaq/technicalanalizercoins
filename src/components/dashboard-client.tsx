@@ -13,6 +13,7 @@ import {
   SidebarInset,
   SidebarInput,
   SidebarMenuSkeleton,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -194,28 +195,38 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <div className="flex-1 p-4 md:p-6 lg:p-8 space-y-6">
+        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden">
+          <SidebarTrigger />
+          <div className="flex items-center gap-2">
+            <Logo className="size-7 text-primary" />
+            <h1 className="text-lg font-semibold">Gold Predictor</h1>
+          </div>
+        </header>
+        <div className="flex-1 space-y-6 p-4 md:p-6 lg:p-8">
           {(isPending && !isSearching) && <DashboardSkeleton />}
           {!isPending && !selectedCoin && <WelcomeMessage />}
           {!isPending && selectedCoin && (
             <div className="space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="text-3xl font-bold tracking-tight">
+              <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
                   {selectedCoin.name} Analysis
                 </h2>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full items-center gap-2 md:w-auto">
                     <span className="text-sm font-medium text-muted-foreground">Timeframe:</span>
-                    {timeframes.map((tf) => (
-                        <Button
-                            key={tf.value}
-                            variant={timeframe === tf.value ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setTimeframe(tf.value)}
-                            disabled={isPending}
-                        >
-                            {tf.label}
-                        </Button>
-                    ))}
+                    <div className="flex flex-1 items-center gap-2 md:flex-none">
+                      {timeframes.map((tf) => (
+                          <Button
+                              key={tf.value}
+                              variant={timeframe === tf.value ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setTimeframe(tf.value)}
+                              disabled={isPending}
+                              className="flex-1 md:flex-none"
+                          >
+                              {tf.label}
+                          </Button>
+                      ))}
+                    </div>
                 </div>
               </div>
 
@@ -242,12 +253,12 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
 
 function WelcomeMessage() {
   return (
-    <div className="flex flex-col items-center justify-center h-full rounded-lg border-2 border-dashed border-border text-center p-8">
-      <div className="flex items-center justify-center size-16 rounded-full bg-secondary mb-4">
+    <div className="flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center">
+      <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-secondary">
         <Bot className="size-8 text-secondary-foreground" />
       </div>
       <h3 className="text-2xl font-bold tracking-tight">Welcome to Binance Gold Predictor</h3>
-      <p className="text-muted-foreground mt-2 max-w-md">
+      <p className="mt-2 max-w-md text-muted-foreground">
         Select a cryptocurrency from the sidebar to begin your AI-powered technical analysis and discover potential trading opportunities.
       </p>
     </div>

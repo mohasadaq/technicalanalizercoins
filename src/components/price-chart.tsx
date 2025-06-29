@@ -38,7 +38,7 @@ export function PriceChart({ priceData, resistanceLevels, suggestedTradePrice }:
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="aspect-video h-[400px] w-full">
+        <ChartContainer config={chartConfig} className="aspect-video h-[250px] w-full md:h-[400px]">
           <ResponsiveContainer>
             <AreaChart data={priceData}>
               <defs>
