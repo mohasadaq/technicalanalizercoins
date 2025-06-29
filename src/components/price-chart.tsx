@@ -17,7 +17,7 @@ interface PriceChartProps {
 const chartConfig = {
   price: {
     label: 'Price (USD)',
-    color: 'hsl(var(--primary))',
+    color: 'hsl(var(--chart-1))',
   },
   ma_short: {
     label: 'Short MA',
@@ -25,7 +25,7 @@ const chartConfig = {
   },
   ma_long: {
     label: 'Long MA',
-    color: 'hsl(var(--chart-3))',
+    color: 'hsl(var(--chart-4))',
   },
 } satisfies ChartConfig;
 
@@ -33,18 +33,18 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Price and Moving Averages</CardTitle>
+        <CardTitle>Price Chart</CardTitle>
         <CardDescription>
-          Historical price data showing the short-term and long-term moving averages.
+          Historical price data with short-term and long-term moving averages.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="aspect-video h-[250px] w-full md:h-[400px]">
+        <ChartContainer config={chartConfig} className="aspect-video h-[300px] w-full lg:h-[400px]">
           <ResponsiveContainer>
             <AreaChart data={priceData}>
               <defs>
                 <linearGradient id="fillPrice" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-price)" stopOpacity={0.8} />
+                  <stop offset="5%" stopColor="var(--color-price)" stopOpacity={0.4} />
                   <stop offset="95%" stopColor="var(--color-price)" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
@@ -71,7 +71,7 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
                   indicator="dot"
                   formatter={(value, name) => 
                     (name === 'price' || name === 'ma_short' || name === 'ma_long') 
-                    ? `$${Number(value).toLocaleString()}` 
+                    ? `$${Number(value).toFixed(2).toLocaleString()}` 
                     : value
                   }
                   />}
@@ -81,6 +81,7 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
                 type="natural"
                 fill="url(#fillPrice)"
                 stroke="var(--color-price)"
+                strokeWidth={2}
                 stackId="a"
               />
               <Area
@@ -107,8 +108,9 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
                     y={suggestedTradePrice}
                     stroke="hsl(var(--accent))"
                     strokeDasharray="3 3"
+                    strokeWidth={2}
                   >
-                     <YAxis.Label value="Suggested Price" position="insideTopRight" fill="hsl(var(--accent))" fontSize={12} />
+                     <YAxis.Label value="Suggested Entry" position="insideTopRight" fill="hsl(var(--accent))" fontSize={12} />
                   </ReferenceLine>
               )}
 
@@ -118,8 +120,9 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
                   y={level} 
                   stroke="hsl(var(--destructive))" 
                   strokeDasharray="3 3"
+                  strokeWidth={1.5}
                 >
-                  <YAxis.Label value={`Resistance ${index + 1}`} position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={12} />
+                  <YAxis.Label value={`R${index + 1}`} position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={12} />
                 </ReferenceLine>
               ))}
 
@@ -129,8 +132,9 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
                   y={level} 
                   stroke="hsl(var(--chart-2))" 
                   strokeDasharray="3 3"
+                  strokeWidth={1.5}
                 >
-                  <YAxis.Label value={`Support ${index + 1}`} position="insideBottomRight" fill="hsl(var(--chart-2))" fontSize={12} />
+                  <YAxis.Label value={`S${index + 1}`} position="insideBottomRight" fill="hsl(var(--chart-2))" fontSize={12} />
                 </ReferenceLine>
               ))}
 

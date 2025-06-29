@@ -100,6 +100,12 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
 
     startTransition(async () => {
       try {
+        setHistoricalData(null);
+        setAnalysis(null);
+        setResistance(null);
+        setSupport(null);
+        setRecommendation(null);
+        
         // 1. Get historical data
         const data = await getHistoricalData(selectedCoin.id, timeframe);
         setHistoricalData(data);
@@ -164,7 +170,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         setSelectedCoin(null);
       }
     });
-  }, [selectedCoin, timeframe, toast, setSelectedCoin]);
+  }, [selectedCoin, timeframe, toast]);
   
   React.useEffect(() => {
     if (selectedCoin) {
@@ -238,33 +244,33 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
             <h1 className="text-lg font-semibold">Gold Predictor</h1>
           </div>
         </header>
-        <div className="flex-1 space-y-6 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 space-y-6 p-4 md:p-6 lg:p-8">
           {(isPending && !isSearching) && <DashboardSkeleton />}
           {!isPending && !selectedCoin && <WelcomeMessage />}
           {!isPending && selectedCoin && (
             <div className="space-y-6">
               <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-baseline gap-4">
-                  <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                    {selectedCoin.name} Analysis
-                  </h2>
-                  {historicalData?.currentPrice && (
-                    <span className="text-2xl font-bold text-primary">
-                      ${historicalData.currentPrice.toLocaleString()}
-                    </span>
-                  )}
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                        {selectedCoin.name} <span className="text-muted-foreground">{selectedCoin.ticker}</span>
+                    </h2>
+                    {historicalData?.currentPrice && (
+                        <p className="text-2xl font-bold text-primary">
+                        ${historicalData.currentPrice.toLocaleString()}
+                        </p>
+                    )}
                 </div>
+
                 <div className="flex w-full items-center gap-2 md:w-auto">
-                    <span className="text-sm font-medium text-muted-foreground">Timeframe:</span>
-                    <div className="flex flex-1 items-center gap-2 md:flex-none">
+                    <div className="flex flex-1 items-center gap-1 rounded-md bg-secondary p-1 md:flex-none">
                       {timeframes.map((tf) => (
                           <Button
                               key={tf.value}
-                              variant={timeframe === tf.value ? 'default' : 'outline'}
+                              variant={timeframe === tf.value ? 'default' : 'ghost'}
                               size="sm"
                               onClick={() => setTimeframe(tf.value)}
                               disabled={isPending}
-                              className="flex-1 md:flex-none"
+                              className="flex-1 md:flex-none shadow-sm"
                           >
                               {tf.label}
                           </Button>
@@ -290,7 +296,8 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
                   supportLevels={support?.supportLevels}
                   suggestedTradePrice={analysis?.suggestedTradePrice}
                 />
-              ) : (isPending && <Skeleton className="aspect-video w-full" />)}
+              ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
+              
               <AnalysisResults
                 analysis={analysis}
                 resistance={resistance}
@@ -300,7 +307,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
               />
             </div>
           )}
-        </div>
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
@@ -308,13 +315,13 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
 
 function WelcomeMessage() {
   return (
-    <div className="flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center">
-      <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-secondary">
-        <Bot className="size-8 text-secondary-foreground" />
+    <div className="flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-8 text-center">
+      <div className="mb-4 flex size-20 items-center justify-center rounded-full bg-secondary">
+        <Bot className="size-10 text-secondary-foreground" />
       </div>
-      <h3 className="text-2xl font-bold tracking-tight">Welcome to Binance Gold Predictor</h3>
+      <h3 className="text-2xl font-bold tracking-tight">Welcome to Gold Predictor</h3>
       <p className="mt-2 max-w-md text-muted-foreground">
-        Select a cryptocurrency from the sidebar to begin your AI-powered technical analysis and discover potential trading opportunities.
+        Select a cryptocurrency from the sidebar to begin your AI-powered technical analysis.
       </p>
     </div>
   );
@@ -323,23 +330,22 @@ function WelcomeMessage() {
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-baseline gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
           <Skeleton className="h-9 w-48" />
           <Skeleton className="h-9 w-24" />
         </div>
         <div className="flex gap-2">
-            <Skeleton className="h-9 w-12" />
-            <Skeleton className="h-9 w-12" />
-            <Skeleton className="h-9 w-12" />
-            <Skeleton className="h-9 w-12" />
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-9" />
         </div>
       </div>
-      <Skeleton className="aspect-video w-full" />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Skeleton className="h-48" />
-        <Skeleton className="h-48" />
-        <Skeleton className="h-48" />
+      <Skeleton className="aspect-video w-full rounded-lg" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Skeleton className="h-64 rounded-lg lg:col-span-2" />
+        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-48 rounded-lg lg:col-span-4" />
       </div>
     </div>
   );
