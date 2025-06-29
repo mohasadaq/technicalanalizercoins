@@ -208,9 +208,16 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
           {!isPending && selectedCoin && (
             <div className="space-y-6">
               <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                  {selectedCoin.name} Analysis
-                </h2>
+                <div className="flex items-baseline gap-4">
+                  <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                    {selectedCoin.name} Analysis
+                  </h2>
+                  {historicalData?.currentPrice && (
+                    <span className="text-2xl font-bold text-primary">
+                      ${historicalData.currentPrice.toLocaleString()}
+                    </span>
+                  )}
+                </div>
                 <div className="flex w-full items-center gap-2 md:w-auto">
                     <span className="text-sm font-medium text-muted-foreground">Timeframe:</span>
                     <div className="flex flex-1 items-center gap-2 md:flex-none">
@@ -269,7 +276,10 @@ function DashboardSkeleton() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Skeleton className="h-9 w-1/3" />
+        <div className="flex items-baseline gap-4">
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-9 w-24" />
+        </div>
         <div className="flex gap-2">
             <Skeleton className="h-9 w-12" />
             <Skeleton className="h-9 w-12" />
