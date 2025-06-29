@@ -25,8 +25,9 @@ const TradeRecommendationSummaryOutputSchema = z.object({
   entryPrice: z.number().optional().describe("The suggested entry price for the trade."),
   takeProfitLevels: z.array(z.object({
       price: z.number().describe("The take-profit price level."),
-      percentage: z.number().describe("The percentage gain from the entry price at this level."),
-  })).describe("An array of suggested take-profit levels with prices and percentage gains."),
+      percentageGain: z.number().describe("The percentage gain from the entry price at this level."),
+      sellPercentage: z.number().describe("The percentage of the position to sell at this level (e.g., 50 for 50%)."),
+  })).describe("An array of suggested take-profit levels, defining a scaling-out strategy. Each level specifies the price, the percentage gain from entry, and what percentage of the position to sell."),
   stopLossLevel: z.number().optional().describe("The suggested stop-loss price level to manage risk."),
   dcaLevels: z.array(z.object({
       price: z.number().describe("The price for the DCA entry."),
@@ -54,7 +55,7 @@ const prompt = ai.definePrompt({
 Analyze the initial analysis, support levels, and resistance levels to formulate a trading strategy. Your recommendation should be specific and include:
 1.  **Strategy**: A clear name for the trading setup (e.g., "Bullish Breakout Above Resistance", "Support Bounce", "Range Trading").
 2.  **Entry Price**: A specific price point to enter the trade. This should be based on the analysis, like a breakout above a resistance or a bounce from a support level.
-3.  **Take-Profit Levels**: Identify 1-3 realistic price targets where the trader could take profits. These should correspond to resistance levels or other technical targets. For each level, provide the price and calculate the percentage gain from the entry price. The percentage should be a number (e.g., for a 5.5% gain, return 5.5).
+3.  **Take-Profit Levels**: Identify 1-3 realistic price targets where the trader could take profits. These should correspond to resistance levels or other technical targets. For each level, provide the price, the percentage gain from the entry price, and **the percentage of the position to sell at this level (e.g., sell 50% at TP1, 30% at TP2).** This defines a scaling-out strategy. The sum of sellPercentage across all levels should not exceed 100.
 4.  **Stop-Loss Level**: A specific price to exit the trade if it moves against the plan. This should be placed logically below a key support level or key technical area to limit potential losses.
 5.  **DCA Levels**: If appropriate for the strategy (e.g., buying a dip, not chasing a sharp breakout), suggest 1-2 Dollar-Cost Averaging (DCA) levels below the initial entry. Base these on key support levels. For each DCA level, specify the price and the percentage of capital to allocate (e.g., 30 for 30%). If a DCA strategy is not suitable, return an empty array for dcaLevels.
 6.  **Summary**: A concise explanation of the reasoning behind the recommendation.

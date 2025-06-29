@@ -192,8 +192,8 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
                     <div className="flex flex-wrap gap-2">
                         {recommendation.takeProfitLevels.map((tp, i) => (
                             <Badge key={i} variant="outline" className="text-accent border-accent/50 bg-accent/10 text-sm py-1">
-                                ${tp.price.toLocaleString()}
-                                <span className="ml-1.5 opacity-90">(+{tp.percentage.toFixed(1)}%)</span>
+                                Sell {tp.sellPercentage}% @ ${tp.price.toLocaleString()}
+                                <span className="ml-1.5 opacity-90 font-semibold">(+{tp.percentageGain.toFixed(1)}%)</span>
                             </Badge>
                         ))}
                     </div>
