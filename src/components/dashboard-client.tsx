@@ -5,15 +5,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Coin, PriceData } from '@/types';
 import {
-  analyzeGoldenCross,
-  predictResistance,
-  predictSupport,
-  tradeRecommendationSummary,
+  generateComprehensiveAnalysis,
   searchCoins,
-  type AnalyzeGoldenCrossOutput,
-  type PredictResistanceOutput,
-  type PredictSupportOutput,
-  type TradeRecommendationSummaryOutput,
+  type ComprehensiveAnalysisOutput,
 } from '@/app/actions';
 import { getHistoricalData } from '@/lib/data';
 import { Logo } from './icons';
@@ -31,10 +25,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   const [isPending, startTransition] = React.useTransition();
 
   const [historicalData, setHistoricalData] = React.useState<{ prices: PriceData[]; dataString: string, currentPrice: number } | null>(null);
-  const [analysis, setAnalysis] = React.useState<AnalyzeGoldenCrossOutput | null>(null);
-  const [resistance, setResistance] = React.useState<PredictResistanceOutput | null>(null);
-  const [support, setSupport] = React.useState<PredictSupportOutput | null>(null);
-  const [recommendation, setRecommendation] = React.useState<TradeRecommendationSummaryOutput | null>(null);
+  const [comprehensiveAnalysis, setComprehensiveAnalysis] = React.useState<ComprehensiveAnalysisOutput | null>(null);
   
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isSearching, startSearchTransition] = React.useTransition();
@@ -79,10 +70,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
 
     setSelectedCoin(coin);
     setHistoricalData(null);
-    setAnalysis(null);
-    setResistance(null);
-    setSupport(null);
-    setRecommendation(null);
+    setComprehensiveAnalysis(null);
     setSearchQuery('');
     setPopoverOpen(false);
   };
@@ -94,55 +82,21 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
       try {
         if (!isRefresh) {
             setHistoricalData(null);
-            setAnalysis(null);
-            setResistance(null);
-            setSupport(null);
-            setRecommendation(null);
+            setComprehensiveAnalysis(null);
         }
         
         const data = await getHistoricalData(selectedCoin.id, timeframe);
         setHistoricalData(data);
 
-        const analysisResult = await analyzeGoldenCross({
+        const analysisResult = await generateComprehensiveAnalysis({
           coinName: selectedCoin.name,
+          coinTicker: selectedCoin.ticker,
           historicalData: data.dataString,
           timeframeDays: timeframe,
+          currentPrice: data.currentPrice,
         });
-        setAnalysis(analysisResult);
 
-        if (analysisResult?.analysis) {
-          const referencePrice = analysisResult.suggestedTradePrice || data.currentPrice;
-
-          const [resistanceResult, supportResult] = await Promise.all([
-            predictResistance({
-              coinTicker: selectedCoin.ticker,
-              referencePrice,
-              analysisContext: analysisResult.analysis,
-            }),
-            predictSupport({
-              coinTicker: selectedCoin.ticker,
-              referencePrice,
-              analysisContext: analysisResult.analysis,
-            }),
-          ]);
-          
-          setResistance(resistanceResult);
-          setSupport(supportResult);
-
-          if (resistanceResult && supportResult) {
-            const recommendationResult = await tradeRecommendationSummary({
-              initialAnalysis: analysisResult.analysis,
-              resistancePrediction: resistanceResult.reasoning,
-              supportPrediction: supportResult.reasoning,
-              currentPrice: data.currentPrice,
-            });
-            setRecommendation(recommendationResult);
-          }
-        } else {
-          setResistance(null);
-          setSupport(null);
-          setRecommendation(null);
-        }
+        setComprehensiveAnalysis(analysisResult);
 
         if (isRefresh) {
             toast({
@@ -280,18 +234,18 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
             {historicalData ? (
                 <PriceChart 
                   priceData={historicalData.prices} 
-                  resistanceLevels={resistance?.resistanceLevels}
-                  supportLevels={support?.supportLevels}
-                  suggestedTradePrice={analysis?.suggestedTradePrice}
+                  resistanceLevels={comprehensiveAnalysis?.resistance?.resistanceLevels}
+                  supportLevels={comprehensiveAnalysis?.support?.supportLevels}
+                  suggestedTradePrice={comprehensiveAnalysis?.analysis?.suggestedTradePrice}
                   timeframe={timeframe}
                 />
             ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
             
             <AnalysisResults
-                analysis={analysis}
-                resistance={resistance}
-                support={support}
-                recommendation={recommendation}
+                analysis={comprehensiveAnalysis?.analysis ?? null}
+                resistance={comprehensiveAnalysis?.resistance ?? null}
+                support={comprehensiveAnalysis?.support ?? null}
+                recommendation={comprehensiveAnalysis?.recommendation ?? null}
                 coin={selectedCoin}
             />
           </div>

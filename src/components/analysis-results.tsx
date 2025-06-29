@@ -1,25 +1,25 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowDownToLine, Bell, Bot, CheckCircle2, Shield, TrendingUp, XCircle, Zap } from 'lucide-react';
+import { ArrowDownToLine, Bell, Bot, CheckCircle2, Shield, TrendingUp, XCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import type {
-  AnalyzeGoldenCrossOutput,
-  PredictResistanceOutput,
-  PredictSupportOutput,
-  TradeRecommendationSummaryOutput,
-} from '@/app/actions';
+import type { ComprehensiveAnalysisOutput } from '@/app/actions';
 import type { Coin } from '@/types';
 import { cn } from '@/lib/utils';
 
+type Analysis = ComprehensiveAnalysisOutput['analysis'] | null;
+type Resistance = ComprehensiveAnalysisOutput['resistance'] | null;
+type Support = ComprehensiveAnalysisOutput['support'] | null;
+type Recommendation = ComprehensiveAnalysisOutput['recommendation'] | null;
+
 interface AnalysisResultsProps {
-  analysis: AnalyzeGoldenCrossOutput | null;
-  resistance: PredictResistanceOutput | null;
-  support: PredictSupportOutput | null;
-  recommendation: TradeRecommendationSummaryOutput | null;
+  analysis: Analysis;
+  resistance: Resistance;
+  support: Support;
+  recommendation: Recommendation;
   coin: Coin;
 }
 
@@ -51,7 +51,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
     }
   };
 
-  const AnalysisCard = ({ analysis }: { analysis: AnalyzeGoldenCrossOutput }) => (
+  const AnalysisCard = ({ analysis }: { analysis: NonNullable<Analysis> }) => (
     <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
@@ -60,7 +60,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
           </div>
           <CardTitle>Market Analysis</CardTitle>
         </div>
-        <CardDescription>{analysis.analysis}</CardDescription>
+        <CardDescription>{analysis.summary}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-4">
         <div className="flex justify-between items-center">
@@ -92,7 +92,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
     </Card>
   );
 
-  const ResistanceCard = ({ resistance }: { resistance: PredictResistanceOutput | null }) => (
+  const ResistanceCard = ({ resistance }: { resistance: Resistance }) => (
     <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
@@ -126,7 +126,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
     </Card>
   );
 
-  const SupportCard = ({ support }: { support: PredictSupportOutput | null }) => (
+  const SupportCard = ({ support }: { support: Support }) => (
     <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
@@ -160,7 +160,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
     </Card>
   );
 
-  const RecommendationCard = ({ recommendation }: { recommendation: TradeRecommendationSummaryOutput | null }) => (
+  const RecommendationCard = ({ recommendation }: { recommendation: Recommendation }) => (
     <Card className="bg-gradient-to-br from-card to-secondary/30 lg:col-span-4 flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
@@ -240,7 +240,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2"><AnalysisCard analysis={analysis} /></div>
+        <div className="lg:col-span-2"><AnalysisCard analysis={analysis!} /></div>
         <ResistanceCard resistance={resistance} />
         <SupportCard support={support} />
         <RecommendationCard recommendation={recommendation} />

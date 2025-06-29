@@ -1,50 +1,21 @@
 'use server';
 
-import { 
-  analyzeGoldenCross as analyzeGoldenCrossFlow, 
-  type AnalyzeGoldenCrossInput, 
-  type AnalyzeGoldenCrossOutput as AnalyzeGoldenCrossOutputType 
-} from '@/ai/flows/golden-cross-analysis';
-import { 
-  predictResistance as predictResistanceFlow, 
-  type PredictResistanceInput, 
-  type PredictResistanceOutput as PredictResistanceOutputType 
-} from '@/ai/flows/resistance-prediction';
-import { 
-  predictSupport as predictSupportFlow, 
-  type PredictSupportInput, 
-  type PredictSupportOutput as PredictSupportOutputType 
-} from '@/ai/flows/support-prediction';
-import { 
-  tradeRecommendationSummary as tradeRecommendationSummaryFlow, 
-  type TradeRecommendationSummaryInput, 
-  type TradeRecommendationSummaryOutput as TradeRecommendationSummaryOutputType 
-} from '@/ai/flows/trade-recommendation-summary';
+import {
+  generateComprehensiveAnalysis as generateComprehensiveAnalysisFlow,
+  type ComprehensiveAnalysisInput,
+  type ComprehensiveAnalysisOutput as ComprehensiveAnalysisOutputType,
+} from '@/ai/flows/comprehensive-analysis';
 import { searchCoins as searchCoinsData } from '@/lib/data';
 import type { Coin } from '@/types';
 
-export type AnalyzeGoldenCrossOutput = AnalyzeGoldenCrossOutputType;
-export type PredictResistanceOutput = PredictResistanceOutputType;
-export type PredictSupportOutput = PredictSupportOutputType;
-export type TradeRecommendationSummaryOutput = TradeRecommendationSummaryOutputType;
+export type ComprehensiveAnalysisOutput = ComprehensiveAnalysisOutputType;
 
-
-export async function analyzeGoldenCross(input: AnalyzeGoldenCrossInput): Promise<AnalyzeGoldenCrossOutput> {
-  return await analyzeGoldenCrossFlow(input);
-}
-
-export async function predictResistance(input: PredictResistanceInput): Promise<PredictResistanceOutput> {
-  return await predictResistanceFlow(input);
-}
-
-export async function predictSupport(input: PredictSupportInput): Promise<PredictSupportOutput> {
-  return await predictSupportFlow(input);
-}
-
-export async function tradeRecommendationSummary(input: TradeRecommendationSummaryInput): Promise<TradeRecommendationSummaryOutput> {
-  return await tradeRecommendationSummaryFlow(input);
+export async function generateComprehensiveAnalysis(
+  input: ComprehensiveAnalysisInput
+): Promise<ComprehensiveAnalysisOutput> {
+  return await generateComprehensiveAnalysisFlow(input);
 }
 
 export async function searchCoins(query: string): Promise<Coin[]> {
-    return await searchCoinsData(query);
+  return await searchCoinsData(query);
 }
