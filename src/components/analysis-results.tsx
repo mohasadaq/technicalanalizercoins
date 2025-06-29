@@ -193,7 +193,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
                         {recommendation.takeProfitLevels.map((tp, i) => (
                             <Badge key={i} variant="outline" className="text-accent border-accent/50 bg-accent/10 text-sm py-1">
                                 ${tp.price.toLocaleString()}
-                                <span className="font-normal ml-1.5 opacity-80">(+{tp.percentage.toFixed(1)}%)</span>
+                                <span className="ml-1.5 opacity-90">(+{tp.percentage.toFixed(1)}%)</span>
                             </Badge>
                         ))}
                     </div>

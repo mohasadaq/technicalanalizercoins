@@ -54,8 +54,8 @@ const prompt = ai.definePrompt({
 Analyze the initial analysis, support levels, and resistance levels to formulate a trading strategy. Your recommendation should be specific and include:
 1.  **Strategy**: A clear name for the trading setup (e.g., "Bullish Breakout Above Resistance", "Support Bounce", "Range Trading").
 2.  **Entry Price**: A specific price point to enter the trade. This should be based on the analysis, like a breakout above a resistance or a bounce from a support level.
-3.  **Take-Profit Levels**: Identify 1-3 realistic price targets where the trader could take profits. These should correspond to resistance levels or other technical targets. For each level, provide the price and the percentage gain from the entry price.
-4.  **Stop-Loss Level**: A specific price to exit the trade if it moves against the plan. This should be placed logically below a support level or key technical area to limit potential losses.
+3.  **Take-Profit Levels**: Identify 1-3 realistic price targets where the trader could take profits. These should correspond to resistance levels or other technical targets. For each level, provide the price and calculate the percentage gain from the entry price. The percentage should be a number (e.g., for a 5.5% gain, return 5.5).
+4.  **Stop-Loss Level**: A specific price to exit the trade if it moves against the plan. This should be placed logically below a key support level or key technical area to limit potential losses.
 5.  **DCA Levels**: If appropriate for the strategy (e.g., buying a dip, not chasing a sharp breakout), suggest 1-2 Dollar-Cost Averaging (DCA) levels below the initial entry. Base these on key support levels. For each DCA level, specify the price and the percentage of capital to allocate (e.g., 30 for 30%). If a DCA strategy is not suitable, return an empty array for dcaLevels.
 6.  **Summary**: A concise explanation of the reasoning behind the recommendation.
 7.  **Confidence**: Your confidence in this trade setup (High, Medium, or Low).
