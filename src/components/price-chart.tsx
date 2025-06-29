@@ -10,6 +10,7 @@ import type { PriceData } from '@/types';
 interface PriceChartProps {
   priceData: PriceData[];
   resistanceLevels?: number[];
+  supportLevels?: number[];
   suggestedTradePrice?: number;
 }
 
@@ -28,7 +29,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function PriceChart({ priceData, resistanceLevels, suggestedTradePrice }: PriceChartProps) {
+export function PriceChart({ priceData, resistanceLevels, supportLevels, suggestedTradePrice }: PriceChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -104,7 +105,7 @@ export function PriceChart({ priceData, resistanceLevels, suggestedTradePrice }:
               {suggestedTradePrice && (
                   <ReferenceLine
                     y={suggestedTradePrice}
-                    stroke="var(--color-accent)"
+                    stroke="hsl(var(--accent))"
                     strokeDasharray="3 3"
                   >
                      <YAxis.Label value="Suggested Price" position="insideTopRight" fill="hsl(var(--accent))" fontSize={12} />
@@ -113,12 +114,23 @@ export function PriceChart({ priceData, resistanceLevels, suggestedTradePrice }:
 
               {resistanceLevels?.map((level, index) => (
                 <ReferenceLine 
-                  key={index} 
+                  key={`res-${index}`} 
                   y={level} 
                   stroke="hsl(var(--destructive))" 
                   strokeDasharray="3 3"
                 >
                   <YAxis.Label value={`Resistance ${index + 1}`} position="insideTopLeft" fill="hsl(var(--destructive))" fontSize={12} />
+                </ReferenceLine>
+              ))}
+
+              {supportLevels?.map((level, index) => (
+                <ReferenceLine 
+                  key={`sup-${index}`} 
+                  y={level} 
+                  stroke="hsl(var(--chart-2))" 
+                  strokeDasharray="3 3"
+                >
+                  <YAxis.Label value={`Support ${index + 1}`} position="insideBottomRight" fill="hsl(var(--chart-2))" fontSize={12} />
                 </ReferenceLine>
               ))}
 

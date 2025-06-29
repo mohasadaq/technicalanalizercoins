@@ -11,6 +11,11 @@ import {
   type PredictResistanceOutput as PredictResistanceOutputType 
 } from '@/ai/flows/resistance-prediction';
 import { 
+  predictSupport as predictSupportFlow, 
+  type PredictSupportInput, 
+  type PredictSupportOutput as PredictSupportOutputType 
+} from '@/ai/flows/support-prediction';
+import { 
   tradeRecommendationSummary as tradeRecommendationSummaryFlow, 
   type TradeRecommendationSummaryInput, 
   type TradeRecommendationSummaryOutput as TradeRecommendationSummaryOutputType 
@@ -20,6 +25,7 @@ import type { Coin } from '@/types';
 
 export type AnalyzeGoldenCrossOutput = AnalyzeGoldenCrossOutputType;
 export type PredictResistanceOutput = PredictResistanceOutputType;
+export type PredictSupportOutput = PredictSupportOutputType;
 export type TradeRecommendationSummaryOutput = TradeRecommendationSummaryOutputType;
 
 
@@ -29,6 +35,10 @@ export async function analyzeGoldenCross(input: AnalyzeGoldenCrossInput): Promis
 
 export async function predictResistance(input: PredictResistanceInput): Promise<PredictResistanceOutput> {
   return await predictResistanceFlow(input);
+}
+
+export async function predictSupport(input: PredictSupportInput): Promise<PredictSupportOutput> {
+  return await predictSupportFlow(input);
 }
 
 export async function tradeRecommendationSummary(input: TradeRecommendationSummaryInput): Promise<TradeRecommendationSummaryOutput> {

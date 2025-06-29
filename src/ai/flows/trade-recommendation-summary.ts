@@ -13,6 +13,7 @@ import {z} from 'genkit';
 const TradeRecommendationSummaryInputSchema = z.object({
   initialAnalysis: z.string().describe('The initial technical analysis of the asset.'),
   resistancePrediction: z.string().describe('The predicted resistance levels.'),
+  supportPrediction: z.string().describe('The predicted support levels.'),
   currentPrice: z.number().describe('The current price of the asset.'),
 });
 export type TradeRecommendationSummaryInput = z.infer<
@@ -39,10 +40,11 @@ const prompt = ai.definePrompt({
   name: 'tradeRecommendationSummaryPrompt',
   input: {schema: TradeRecommendationSummaryInputSchema},
   output: {schema: TradeRecommendationSummaryOutputSchema},
-  prompt: `Based on the following initial technical analysis and resistance prediction, provide a concise trade recommendation (buy/sell prices) and a confidence indicator.
+  prompt: `Based on the following initial technical analysis, resistance prediction, and support prediction, provide a concise trade recommendation (buy/sell prices) and a confidence indicator.
 
 Initial Analysis: {{{initialAnalysis}}}
 Resistance Prediction: {{{resistancePrediction}}}
+Support Prediction: {{{supportPrediction}}}
 Current Price: {{{currentPrice}}}
 
 Trade Recommendation:`,

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { AlertTriangle, Bell, Bot, CheckCircle2, Shield, TrendingUp, XCircle } from 'lucide-react';
+import { ArrowDownToLine, Bell, Bot, CheckCircle2, Shield, TrendingUp, XCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import type {
   AnalyzeGoldenCrossOutput,
   PredictResistanceOutput,
+  PredictSupportOutput,
   TradeRecommendationSummaryOutput,
 } from '@/app/actions';
 import type { Coin } from '@/types';
@@ -16,11 +17,12 @@ import type { Coin } from '@/types';
 interface AnalysisResultsProps {
   analysis: AnalyzeGoldenCrossOutput | null;
   resistance: PredictResistanceOutput | null;
+  support: PredictSupportOutput | null;
   recommendation: TradeRecommendationSummaryOutput | null;
   coin: Coin;
 }
 
-export function AnalysisResults({ analysis, resistance, recommendation, coin }: AnalysisResultsProps) {
+export function AnalysisResults({ analysis, resistance, support, recommendation, coin }: AnalysisResultsProps) {
   const { toast } = useToast();
 
   const handleSetAlert = () => {
@@ -50,7 +52,7 @@ export function AnalysisResults({ analysis, resistance, recommendation, coin }: 
 
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-2">
       {analysis.goldenCrossDetected ? (
         <Card>
           <CardHeader>
@@ -151,6 +153,36 @@ export function AnalysisResults({ analysis, resistance, recommendation, coin }: 
         </CardContent>
       </Card>
       
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-md bg-chart-2/10">
+              <ArrowDownToLine className="size-6 text-chart-2" />
+            </div>
+            <CardTitle>Support Prediction</CardTitle>
+          </div>
+          <CardDescription>{support?.reasoning || 'Awaiting support analysis...'}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Confidence</span>
+            <Badge variant="outline" className={support ? confidenceColor(support.confidence > 0.7 ? 'High' : support.confidence > 0.4 ? 'Medium' : 'Low') : ''}>
+              {support ? `${(support.confidence * 100).toFixed(0)}%` : 'N/A'}
+            </Badge>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Predicted Levels</span>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {support?.supportLevels?.map((level, i) => (
+                <Badge key={i} variant="secondary" className="text-base">
+                  ${level.toLocaleString()}
+                </Badge>
+              )) || <span className="text-sm text-muted-foreground">No levels predicted.</span>}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="bg-gradient-to-br from-primary/10 to-card">
         <CardHeader>
           <div className="flex items-center gap-3 mb-2">

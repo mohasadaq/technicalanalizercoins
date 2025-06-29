@@ -21,10 +21,12 @@ import type { Coin, PriceData } from '@/types';
 import {
   analyzeGoldenCross,
   predictResistance,
+  predictSupport,
   tradeRecommendationSummary,
   searchCoins,
   type AnalyzeGoldenCrossOutput,
   type PredictResistanceOutput,
+  type PredictSupportOutput,
   type TradeRecommendationSummaryOutput,
 } from '@/app/actions';
 import { getHistoricalData } from '@/lib/data';
@@ -42,6 +44,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   const [historicalData, setHistoricalData] = React.useState<{ prices: PriceData[]; dataString: string, currentPrice: number } | null>(null);
   const [analysis, setAnalysis] = React.useState<AnalyzeGoldenCrossOutput | null>(null);
   const [resistance, setResistance] = React.useState<PredictResistanceOutput | null>(null);
+  const [support, setSupport] = React.useState<PredictSupportOutput | null>(null);
   const [recommendation, setRecommendation] = React.useState<TradeRecommendationSummaryOutput | null>(null);
   
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -87,6 +90,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
     setHistoricalData(null);
     setAnalysis(null);
     setResistance(null);
+    setSupport(null);
     setRecommendation(null);
     setSearchQuery('');
   };
@@ -96,9 +100,11 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
 
     startTransition(async () => {
       try {
+        // 1. Get historical data
         const data = await getHistoricalData(selectedCoin.id, timeframe);
         setHistoricalData(data);
 
+        // 2. Perform initial analysis
         const analysisResult = await analyzeGoldenCross({
           coinName: selectedCoin.name,
           historicalData: data.dataString,
@@ -106,22 +112,38 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         });
         setAnalysis(analysisResult);
 
-        if (analysisResult && analysisResult.analysis) {
-          const resistanceResult = await predictResistance({
-            coinTicker: selectedCoin.ticker,
-            referencePrice: analysisResult.suggestedTradePrice || data.currentPrice,
-            analysisContext: analysisResult.analysis,
-          });
-          setResistance(resistanceResult);
+        // 3. If analysis is successful, predict support & resistance, then get recommendation
+        if (analysisResult?.analysis) {
+          const referencePrice = analysisResult.suggestedTradePrice || data.currentPrice;
+
+          const [resistanceResult, supportResult] = await Promise.all([
+            predictResistance({
+              coinTicker: selectedCoin.ticker,
+              referencePrice,
+              analysisContext: analysisResult.analysis,
+            }),
+            predictSupport({
+              coinTicker: selectedCoin.ticker,
+              referencePrice,
+              analysisContext: analysisResult.analysis,
+            }),
+          ]);
           
-          const recommendationResult = await tradeRecommendationSummary({
-            initialAnalysis: analysisResult.analysis,
-            resistancePrediction: resistanceResult.reasoning,
-            currentPrice: data.currentPrice,
-          });
-          setRecommendation(recommendationResult);
+          setResistance(resistanceResult);
+          setSupport(supportResult);
+
+          if (resistanceResult && supportResult) {
+            const recommendationResult = await tradeRecommendationSummary({
+              initialAnalysis: analysisResult.analysis,
+              resistancePrediction: resistanceResult.reasoning,
+              supportPrediction: supportResult.reasoning,
+              currentPrice: data.currentPrice,
+            });
+            setRecommendation(recommendationResult);
+          }
         } else {
           setResistance(null);
+          setSupport(null);
           setRecommendation(null);
         }
 
@@ -240,13 +262,15 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
               {historicalData ? (
                 <PriceChart 
                   priceData={historicalData.prices} 
-                  resistanceLevels={resistance?.resistanceLevels} 
+                  resistanceLevels={resistance?.resistanceLevels}
+                  supportLevels={support?.supportLevels}
                   suggestedTradePrice={analysis?.suggestedTradePrice}
                 />
               ) : (isPending && <Skeleton className="aspect-video w-full" />)}
               <AnalysisResults
                 analysis={analysis}
                 resistance={resistance}
+                support={support}
                 recommendation={recommendation}
                 coin={selectedCoin}
               />
