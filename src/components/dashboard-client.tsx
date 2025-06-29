@@ -35,6 +35,7 @@ import { PriceChart } from './price-chart';
 import { AnalysisResults } from './analysis-results';
 import { Skeleton } from './ui/skeleton';
 import { Bot, CandlestickChart, Github, RefreshCw, Search } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
   const { toast } = useToast();
@@ -100,11 +101,13 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
 
     startTransition(async () => {
       try {
-        setHistoricalData(null);
-        setAnalysis(null);
-        setResistance(null);
-        setSupport(null);
-        setRecommendation(null);
+        if (!isRefresh) {
+            setHistoricalData(null);
+            setAnalysis(null);
+            setResistance(null);
+            setSupport(null);
+            setRecommendation(null);
+        }
         
         // 1. Get historical data
         const data = await getHistoricalData(selectedCoin.id, timeframe);
@@ -237,19 +240,35 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden">
-          <SidebarTrigger />
-          <div className="flex items-center gap-2">
-            <Logo className="size-7 text-primary" />
-            <h1 className="text-lg font-semibold">Gold Predictor</h1>
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger />
+            {selectedCoin ? (
+                <div className="flex flex-col">
+                  <h1 className="text-lg font-semibold leading-none">{selectedCoin.name}</h1>
+                  <span className="text-xs text-muted-foreground">{selectedCoin.ticker}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Logo className="size-7 text-primary" />
+                  <h1 className="text-lg font-semibold">Gold Predictor</h1>
+                </div>
+            )}
           </div>
+          {selectedCoin && (
+            <Button variant="ghost" size="icon" onClick={() => runAnalysis(true)} disabled={isPending} className="h-8 w-8">
+              <RefreshCw className={`h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
+              <span className="sr-only">Refresh</span>
+            </Button>
+          )}
         </header>
-        <main className="flex-1 space-y-6 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 space-y-4 p-4 md:space-y-6 md:p-6 lg:p-8">
           {(isPending && !isSearching) && <DashboardSkeleton />}
           {!isPending && !selectedCoin && <WelcomeMessage />}
           {!isPending && selectedCoin && (
             <div className="space-y-6">
-              <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+              {/* Desktop Header */}
+              <div className="hidden md:flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
                         {selectedCoin.name} <span className="text-muted-foreground">{selectedCoin.ticker}</span>
@@ -289,22 +308,78 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
                 </div>
               </div>
 
-              {historicalData ? (
-                <PriceChart 
-                  priceData={historicalData.prices} 
-                  resistanceLevels={resistance?.resistanceLevels}
-                  supportLevels={support?.supportLevels}
-                  suggestedTradePrice={analysis?.suggestedTradePrice}
-                />
-              ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
+              {/* Mobile Price & Controls */}
+              <div className="space-y-4 md:hidden">
+                 {historicalData?.currentPrice && (
+                    <p className="text-3xl font-bold text-primary">
+                    ${historicalData.currentPrice.toLocaleString()}
+                    </p>
+                )}
+                <div className="flex w-full items-center gap-2">
+                    <div className="flex flex-1 items-center gap-1 rounded-md bg-secondary p-1">
+                        {timeframes.map((tf) => (
+                            <Button
+                                key={tf.value}
+                                variant={timeframe === tf.value ? 'default' : 'ghost'}
+                                size="sm"
+                                onClick={() => setTimeframe(tf.value)}
+                                disabled={isPending}
+                                className="flex-1 shadow-sm"
+                            >
+                                {tf.label}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+              </div>
+
+              {/* Mobile Tabs */}
+              <Tabs defaultValue="chart" className="w-full md:hidden">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="chart">Chart</TabsTrigger>
+                    <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
+                </TabsList>
+                <TabsContent value="chart" className="pt-4">
+                  {historicalData ? (
+                    <PriceChart 
+                      priceData={historicalData.prices} 
+                      resistanceLevels={resistance?.resistanceLevels}
+                      supportLevels={support?.supportLevels}
+                      suggestedTradePrice={analysis?.suggestedTradePrice}
+                    />
+                  ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
+                </TabsContent>
+                <TabsContent value="analysis" className="pt-4">
+                  <AnalysisResults
+                    analysis={analysis}
+                    resistance={resistance}
+                    support={support}
+                    recommendation={recommendation}
+                    coin={selectedCoin}
+                  />
+                </TabsContent>
+              </Tabs>
               
-              <AnalysisResults
-                analysis={analysis}
-                resistance={resistance}
-                support={support}
-                recommendation={recommendation}
-                coin={selectedCoin}
-              />
+              {/* Desktop View */}
+              <div className="hidden space-y-6 md:block">
+                {historicalData ? (
+                    <PriceChart 
+                    priceData={historicalData.prices} 
+                    resistanceLevels={resistance?.resistanceLevels}
+                    supportLevels={support?.supportLevels}
+                    suggestedTradePrice={analysis?.suggestedTradePrice}
+                    />
+                ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
+                
+                <AnalysisResults
+                    analysis={analysis}
+                    resistance={resistance}
+                    support={support}
+                    recommendation={recommendation}
+                    coin={selectedCoin}
+                />
+              </div>
+
             </div>
           )}
         </main>
