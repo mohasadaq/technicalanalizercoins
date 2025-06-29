@@ -64,7 +64,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
       </CardHeader>
       <CardContent className="flex-grow space-y-4">
         <div className="flex justify-between items-center">
-          <span className="text-muted-foreground">Golden Cross</span>
+          <span className="text-muted-foreground">Bullish Signal</span>
           <Badge variant="outline" className={cn(analysis.goldenCrossDetected ? 'text-accent border-accent/50 bg-accent/10' : 'text-muted-foreground border-dashed')}>
             {analysis.goldenCrossDetected ? <CheckCircle2 className="mr-2 h-4 w-4" /> : <XCircle className="mr-2 h-4 w-4" />}
             {analysis.goldenCrossDetected ? 'Detected' : 'Not Detected'}
@@ -161,7 +161,7 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
   );
 
   const RecommendationCard = ({ recommendation }: { recommendation: TradeRecommendationSummaryOutput | null }) => (
-    <Card className="bg-gradient-to-br from-card to-secondary/30 md:col-span-2 flex flex-col">
+    <Card className="bg-gradient-to-br from-card to-secondary/30 lg:col-span-4 flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2 rounded-md bg-primary/10">
@@ -169,20 +169,54 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
           </div>
           <CardTitle>AI Trade Recommendation</CardTitle>
         </div>
-        <CardDescription className="text-base">{recommendation?.recommendation || 'Awaiting final recommendation...'}</CardDescription>
+        {recommendation ? (
+            <CardDescription className="text-base">{recommendation.summary}</CardDescription>
+        ) : (
+            <CardDescription className="text-base">Awaiting final recommendation...</CardDescription>
+        )}
       </CardHeader>
-      <CardContent className="flex-grow">
-          {recommendation && (
-            <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Recommendation Confidence</span>
+      <CardContent className="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {recommendation ? (
+          <>
+            <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Strategy</p>
+                <Badge variant="secondary" className="text-base py-1 px-3">{recommendation.strategy}</Badge>
+            </div>
+            <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Entry Price</p>
+                <p className="text-lg font-bold text-primary">{recommendation.entryPrice ? `$${recommendation.entryPrice.toLocaleString()}`: 'N/A'}</p>
+            </div>
+            <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Take Profit</p>
+                <div className="flex flex-wrap gap-2">
+                    {recommendation.takeProfitLevels.map((tp, i) => (
+                        <Badge key={i} variant="outline" className="text-accent border-accent/50 bg-accent/10 text-sm">
+                            ${tp.toLocaleString()}
+                        </Badge>
+                    ))}
+                </div>
+            </div>
+            <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Stop Loss</p>
+                <p className="text-lg font-bold text-destructive">{recommendation.stopLossLevel ? `$${recommendation.stopLossLevel.toLocaleString()}` : 'N/A'}</p>
+            </div>
+          </>
+        ) : (
+          <div className="md:col-span-2 lg:col-span-4 text-center text-muted-foreground py-8">
+            Generating detailed trade plan...
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="flex-col items-stretch gap-4 md:flex-row md:justify-between md:items-center">
+         {recommendation && (
+            <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Confidence</span>
                 <Badge variant="outline" className={confidenceColor(recommendation?.confidence)}>
-                {recommendation?.confidence || 'N/A'}
+                    {recommendation?.confidence || 'N/A'}
                 </Badge>
             </div>
-          )}
-      </CardContent>
-      <CardFooter>
-        <Button size="lg" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSetAlert} disabled={!recommendation}>
+         )}
+        <Button size="lg" className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSetAlert} disabled={!recommendation}>
           <Bell className="mr-2 h-5 w-5" /> Set Price Alert
         </Button>
       </CardFooter>
@@ -192,9 +226,9 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-2"><AnalysisCard analysis={analysis} /></div>
-        <div><ResistanceCard resistance={resistance} /></div>
-        <div><SupportCard support={support} /></div>
-        <div className="lg:col-span-4"><RecommendationCard recommendation={recommendation} /></div>
+        <ResistanceCard resistance={resistance} />
+        <SupportCard support={support} />
+        <RecommendationCard recommendation={recommendation} />
     </div>
   );
 }
