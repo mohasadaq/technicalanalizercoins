@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -21,7 +20,7 @@ import { Logo } from './icons';
 import { PriceChart } from './price-chart';
 import { AnalysisResults } from './analysis-results';
 import { Skeleton } from './ui/skeleton';
-import { Bot, CandlestickChart, ChevronsUpDown, Github, RefreshCw, Search } from 'lucide-react';
+import { Bot, CandlestickChart, ChevronsUpDown, RefreshCw, Search } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -232,21 +231,6 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
                     </ScrollArea>
                 </PopoverContent>
             </Popover>
-
-            <div className="flex items-center gap-2">
-                <Button variant="ghost" asChild className="hidden sm:flex">
-                    <a href="https://github.com/firebase/studio-examples" target="_blank">
-                        <Github />
-                        <span>Source Code</span>
-                    </a>
-                </Button>
-                <Button variant="ghost" size="icon" asChild className="flex sm:hidden">
-                    <a href="https://github.com/firebase/studio-examples" target="_blank">
-                        <Github />
-                        <span className="sr-only">Source Code</span>
-                    </a>
-                </Button>
-            </div>
         </header>
       <main className="flex-1 space-y-4 p-4 md:space-y-6 md:p-6 lg:p-8">
         {(isPending && !isSearching) && <DashboardSkeleton />}
