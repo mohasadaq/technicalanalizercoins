@@ -85,7 +85,7 @@ export async function getHistoricalData(coinId: string, days: number = 30): Prom
         const twoHundredDayMA = calculateMA(justPrices, 200);
 
         const prices: PriceData[] = priceData.map((p, i) => ({
-            date: p.date.toISOString().split('T')[0],
+            date: days <= 1 ? p.date.toISOString() : p.date.toISOString().split('T')[0],
             price: parseFloat(p.price.toFixed(2)),
             'ma_short': fiftyDayMA[i] !== undefined ? parseFloat(fiftyDayMA[i]!.toFixed(2)) : undefined,
             'ma_long': twoHundredDayMA[i] !== undefined ? parseFloat(twoHundredDayMA[i]!.toFixed(2)) : undefined,
@@ -93,7 +93,8 @@ export async function getHistoricalData(coinId: string, days: number = 30): Prom
 
         let dataString = 'Date,Price,ma_short,ma_long\n';
         prices.forEach(p => {
-            dataString += `${p.date},${p.price},${p['ma_short'] !== undefined ? p['ma_short'] : ''},${p['ma_long'] !== undefined ? p['ma_long'] : ''}\n`;
+            const dateForPrompt = days <= 1 ? new Date(p.date).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short'}) : p.date;
+            dataString += `${dateForPrompt},${p.price},${p['ma_short'] !== undefined ? p['ma_short'] : ''},${p['ma_long'] !== undefined ? p['ma_long'] : ''}\n`;
         });
         
         const currentPrice = prices[prices.length - 1].price;

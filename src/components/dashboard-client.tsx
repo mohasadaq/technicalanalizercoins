@@ -299,6 +299,7 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
                   resistanceLevels={resistance?.resistanceLevels}
                   supportLevels={support?.supportLevels}
                   suggestedTradePrice={analysis?.suggestedTradePrice}
+                  timeframe={timeframe}
                 />
             ) : (isPending && <Skeleton className="aspect-video w-full rounded-lg" />)}
             
