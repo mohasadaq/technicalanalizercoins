@@ -1,1 +1,6 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/trade-recommendation-summary.ts';
+import '@/ai/flows/resistance-prediction.ts';
+import '@/ai/flows/golden-cross-analysis.ts';
