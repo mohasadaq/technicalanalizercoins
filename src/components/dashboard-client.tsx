@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -240,27 +241,40 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger />
-            {selectedCoin ? (
-                <div className="flex flex-col">
-                  <h1 className="text-lg font-semibold leading-none">{selectedCoin.name}</h1>
-                  <span className="text-xs text-muted-foreground">{selectedCoin.ticker}</span>
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
+            <div className="flex items-center gap-4">
+                <SidebarTrigger />
+                {selectedCoin ? (
+                <div>
+                    <h1 className="font-semibold text-base leading-tight">
+                    {selectedCoin.name}{' '}
+                    <span className="text-muted-foreground">{selectedCoin.ticker}</span>
+                    </h1>
+                    {historicalData?.currentPrice && (
+                    <p className="text-sm font-bold text-primary leading-tight">
+                        ${historicalData.currentPrice.toLocaleString()}
+                    </p>
+                    )}
                 </div>
-              ) : (
+                ) : (
                 <div className="flex items-center gap-2">
-                  <Logo className="size-7 text-primary" />
-                  <h1 className="text-lg font-semibold">Gold Predictor</h1>
+                    <Logo className="size-7 text-primary" />
+                    <h1 className="text-lg font-semibold">Gold Predictor</h1>
                 </div>
+                )}
+            </div>
+            {selectedCoin && (
+                <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => runAnalysis(true)}
+                disabled={isPending}
+                className="h-8 w-8"
+                >
+                <RefreshCw className={`h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
+                <span className="sr-only">Refresh</span>
+                </Button>
             )}
-          </div>
-          {selectedCoin && (
-            <Button variant="ghost" size="icon" onClick={() => runAnalysis(true)} disabled={isPending} className="h-8 w-8">
-              <RefreshCw className={`h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
-              <span className="sr-only">Refresh</span>
-            </Button>
-          )}
         </header>
         <main className="flex-1 space-y-4 p-4 md:space-y-6 md:p-6 lg:p-8">
           {(isPending && !isSearching) && <DashboardSkeleton />}
@@ -308,38 +322,29 @@ export function DashboardClient({ coins: initialCoins }: { coins: Coin[] }) {
                 </div>
               </div>
 
-              {/* Mobile Price & Controls */}
-              <div className="space-y-4 md:hidden">
-                 {historicalData?.currentPrice && (
-                    <p className="text-3xl font-bold text-primary">
-                    ${historicalData.currentPrice.toLocaleString()}
-                    </p>
-                )}
-                <div className="flex w-full items-center gap-2">
-                    <div className="flex flex-1 items-center gap-1 rounded-md bg-secondary p-1">
-                        {timeframes.map((tf) => (
-                            <Button
-                                key={tf.value}
-                                variant={timeframe === tf.value ? 'default' : 'ghost'}
-                                size="sm"
-                                onClick={() => setTimeframe(tf.value)}
-                                disabled={isPending}
-                                className="flex-1 shadow-sm"
-                            >
-                                {tf.label}
-                            </Button>
-                        ))}
-                    </div>
-                </div>
-              </div>
-
               {/* Mobile Tabs */}
               <Tabs defaultValue="chart" className="w-full md:hidden">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="chart">Chart</TabsTrigger>
                     <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
                 </TabsList>
-                <TabsContent value="chart" className="pt-4">
+                <TabsContent value="chart" className="pt-4 space-y-4">
+                  <div className="flex w-full items-center gap-2">
+                      <div className="flex flex-1 items-center gap-1 rounded-md bg-secondary p-1">
+                          {timeframes.map((tf) => (
+                              <Button
+                                  key={tf.value}
+                                  variant={timeframe === tf.value ? 'default' : 'ghost'}
+                                  size="sm"
+                                  onClick={() => setTimeframe(tf.value)}
+                                  disabled={isPending}
+                                  className="flex-1 shadow-sm"
+                              >
+                                  {tf.label}
+                              </Button>
+                          ))}
+                      </div>
+                  </div>
                   {historicalData ? (
                     <PriceChart 
                       priceData={historicalData.prices} 
