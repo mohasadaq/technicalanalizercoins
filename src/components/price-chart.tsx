@@ -65,7 +65,7 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
             {priceItem && <p style={{ color: 'hsl(var(--chart-1))' }}>Price: {`$${priceItem.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</p>}
             {maShortItem?.value && <p style={{ color: 'hsl(var(--chart-2))' }}>Short MA: {`$${maShortItem.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</p>}
             {maLongItem?.value && <p style={{ color: 'hsl(var(--chart-4))' }}>Long MA: {`$${maLongItem.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</p>}
-            {volumeItem?.value > 0 && <p className="text-muted-foreground">Volume (M): {`$${volumeItem.value.toFixed(2)}`}</p>}
+            {volumeItem?.value > 0 && <p className="text-muted-foreground">Volume (M): {`${volumeItem.value.toFixed(2)}`}</p>}
             {rsiItem?.value && <p style={{ color: 'hsl(var(--chart-5))' }}>RSI: {`${rsiItem.value.toFixed(2)}`}</p>}
         </div>
       );
@@ -124,7 +124,7 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
                         tickMargin={8}
                         orientation="right"
                         domain={[0, 'dataMax * 4']}
-                        tickFormatter={(value) => `$${value}M`}
+                        tickFormatter={(value) => `${value}M`}
                     />
                     <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsla(var(--muted), 0.3)' }} />
                     <Bar dataKey="volume" fill="hsla(var(--foreground), 0.2)" />
