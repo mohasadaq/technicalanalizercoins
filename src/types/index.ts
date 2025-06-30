@@ -9,4 +9,6 @@ export interface PriceData {
   price: number;
   "ma_short"?: number;
   "ma_long"?: number;
+  volume?: number;
+  rsi?: number;
 }
