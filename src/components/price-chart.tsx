@@ -84,7 +84,7 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
       <CardContent className="pr-1">
         <div className="grid h-[550px] w-full gap-4">
             {/* Price Chart */}
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
                 <AreaChart data={priceData} syncId={syncId} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="fillPrice" x1="0" y1="0" x2="0" y2="1">
@@ -111,7 +111,7 @@ export function PriceChart({ priceData, resistanceLevels, supportLevels, suggest
                   {resistanceLevels?.map((level, index) => <ReferenceLine key={`res-${index}`} y={level} stroke="hsl(var(--destructive))" strokeDasharray="4 4" strokeWidth={1} label={{ value: `R${index + 1}`, position: "insideTopLeft", fill: "hsl(var(--destructive))", fontSize: 12, fontWeight: 'bold' }} />)}
                   {supportLevels?.map((level, index) => <ReferenceLine key={`sup-${index}`} y={level} stroke="hsl(var(--chart-2))" strokeDasharray="4 4" strokeWidth={1} label={{ value: `S${index + 1}`, position: "insideBottomRight", fill: "hsl(var(--chart-2))", fontSize: 12, fontWeight: 'bold' }}/>)}
                 </AreaChart>
-            </ResponsiveContainer>
+            </ChartContainer>
             
             {/* Volume Chart */}
             <ResponsiveContainer width="100%" height={100}>
