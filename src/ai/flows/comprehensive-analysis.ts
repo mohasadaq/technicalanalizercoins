@@ -37,6 +37,7 @@ const ComprehensiveAnalysisOutputSchema = z.object({
       reasoning: z.string().describe('Explanation of the reasoning behind the support level predictions.'),
   }),
   recommendation: z.object({
+      actionSignal: z.enum(['BUY', 'WAIT']).describe("A clear signal on whether to act now or wait. 'BUY' if the current price is opportune for entry; 'WAIT' if confirmation or a better price is needed."),
       strategy: z.string().describe("The name of the trading strategy (e.g., 'Bullish Breakout', 'Range Trading')."),
       entryPrice: z.number().optional().describe("The suggested entry price for the trade."),
       takeProfitLevels: z.array(z.object({
@@ -96,6 +97,7 @@ const prompt = ai.definePrompt({
 
 **3. Actionable Trade Recommendation:**
    - **Strategy Formulation:** Devise a complete trading strategy and give it a professional name (e.g., "Bullish Continuation Play," "Key Support Bounce Entry").
+   - **Immediate Action Signal:** Based on the \`currentPrice\` relative to your recommended \`entryPrice\`, determine the immediate action. Set \`actionSignal\` to "BUY" if the current price is at a suitable entry point for the defined strategy. Set it to "WAIT" if the price is far from the entry or if a confirmation signal (e.g., a breakout above resistance) is still required. This field is mandatory.
    - **Entry Price:** Define a precise \`entryPrice\`. This should be a logical level, not just the current price (e.g., "entry on a confirmed break above $X").
    - **Take-Profit (Scaling-Out) Plan:**
      - Provide 1-3 distinct \`takeProfitLevels\`.

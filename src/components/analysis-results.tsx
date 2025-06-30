@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowDownToLine, Bell, Bot, CheckCircle2, Shield, TrendingUp, XCircle } from 'lucide-react';
+import { ArrowDownToLine, Bell, Bot, CheckCircle2, Hourglass, Shield, TrendingUp, XCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -163,11 +163,28 @@ export function AnalysisResults({ analysis, resistance, support, recommendation,
   const RecommendationCard = ({ recommendation }: { recommendation: Recommendation }) => (
     <Card className="bg-gradient-to-br from-card to-secondary/30 lg:col-span-4 flex flex-col">
       <CardHeader>
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-md bg-primary/10">
-            <Bot className="size-6 text-primary" />
-          </div>
-          <CardTitle>AI Trade Recommendation</CardTitle>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+            <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-primary/10">
+                    <Bot className="size-6 text-primary" />
+                </div>
+                <CardTitle>AI Trade Recommendation</CardTitle>
+            </div>
+            {recommendation?.actionSignal && (
+                <Badge variant="outline" className={cn(
+                    "py-1.5 px-3 text-base w-full sm:w-auto justify-center",
+                    recommendation.actionSignal === 'BUY' 
+                        ? 'bg-accent/10 text-accent border-accent/20'
+                        : 'bg-yellow-400/10 text-yellow-400 border-yellow-400/20'
+                )}>
+                    {recommendation.actionSignal === 'BUY' ? (
+                        <CheckCircle2 className="mr-2 size-5" />
+                    ) : (
+                        <Hourglass className="mr-2 size-5" />
+                    )}
+                    <span className="font-semibold">{recommendation.actionSignal === 'BUY' ? 'Ready to Buy' : 'Wait for Signal'}</span>
+                </Badge>
+            )}
         </div>
         {recommendation ? (
             <CardDescription className="text-base">{recommendation.summary}</CardDescription>
