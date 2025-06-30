@@ -100,10 +100,11 @@ const prompt = ai.definePrompt({
    - **Immediate Action Signal:** Based on the \`currentPrice\` relative to your recommended \`entryPrice\`, determine the immediate action. Set \`actionSignal\` to "BUY" if the current price is at a suitable entry point for the defined strategy. Set it to "WAIT" if the price is far from the entry or if a confirmation signal (e.g., a breakout above resistance) is still required. This field is mandatory.
    - **Entry Price:** Define a precise \`entryPrice\`. This should be a logical level, not just the current price (e.g., "entry on a confirmed break above $X").
    - **Take-Profit (Scaling-Out) Plan:**
-     - Provide 1-3 distinct \`takeProfitLevels\`.
+     - Provide 1-3 distinct \`takeProfitLevels\`. These levels **MUST** be higher than the \`entryPrice\`.
+     - Base these targets on the resistance levels you identified or other technical price targets.
      - For each level, specify the target \`price\`, the \`percentageGain\` from entry, and the \`sellPercentage\` (the portion of the total position to sell). The total \`sellPercentage\` should not exceed 100. This models a professional risk management approach.
    - **Risk Management (Stop-Loss):**
-     - Define a logical \`stopLossLevel\`. This MUST be placed at a technically significant point (e.g., just below a key support level or a recent swing low) to invalidate the trade idea if hit.
+     - Define a logical \`stopLossLevel\`. This **MUST** be placed at a price *below* the \`entryPrice\` and at a technically significant point (e.g., just below a key support level or a recent swing low) to invalidate the trade idea if hit.
    - **Dollar-Cost Averaging (DCA):**
      - Suggest \`dcaLevels\` ONLY if the strategy is "buying a dip" into a strong support zone. For breakout strategies, this is generally inappropriate.
      - If you suggest DCA, provide 1-2 levels with price and capital \`allocation\`. Otherwise, return an empty array.
